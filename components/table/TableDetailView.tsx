@@ -4,9 +4,17 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { ChevronLeft, RotateCcw } from "lucide-react";
+import { ChevronLeft, RotateCcw, Search } from "lucide-react";
 import { DataGrid } from "./DataGrid";
 import { ExportButton } from "@/components/export/ExportButton";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CATALOG_LABELS, fieldLabel } from "@/lib/data-mappers";
 import type { CatalogCode } from "@/types/nfz";
 import type { ApiResponse } from "@/lib/api-response";
@@ -19,7 +27,7 @@ const MIN_YEAR = 2015;
 
 const ALL_YEARS = Array.from(
   { length: CURRENT_YEAR - MIN_YEAR + 1 },
-  (_, i) => CURRENT_YEAR - i, // descending
+  (_, i) => MIN_YEAR + i,
 );
 
 const OVERVIEW_COLUMNS = [
@@ -61,6 +69,16 @@ const BREAKDOWN_TABS: Record<string, { label: string; apiPath: string; columns: 
     label: "Zakres świadczeń",
     apiPath: "/api/nfz/hospitalizations/by-healthcare-services",
     columns: ["contract-product-name", "number-of-hospitalizations", "percentage", "duration-of-hospitalization-mediana"],
+  },
+  "icd-10-diseases": {
+    label: "ICD-10",
+    apiPath: "/api/nfz/icd10-diseases",
+    columns: ["disease-code", "disease-name", "number-of-hospitalizations", "percentage", "duration-of-hospitalization-mediana"],
+  },
+  "icd-9-procedures": {
+    label: "ICD-9",
+    apiPath: "/api/nfz/icd9-procedures",
+    columns: ["procedure-code", "procedure-name", "number-of-hospitalizations", "percentage", "duration-of-hospitalization-mediana"],
   },
 };
 
@@ -118,6 +136,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
   const [yearFrom, setYearFrom] = useState(MIN_YEAR);
   const [yearTo, setYearTo] = useState(CURRENT_YEAR);
   const [activeTab, setActiveTab] = useState("");
+  const [medicalFilter, setMedicalFilter] = useState("");
 
   // 1. Index query
   const indexQuery = useQuery({
@@ -193,6 +212,16 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
     queryFn: () => fetchTabData(BREAKDOWN_TABS["hospitalization-by-service"].apiPath, uuidMap["hospitalization-by-service"]),
     enabled: !!uuidMap["hospitalization-by-service"],
   });
+  const icd10Query = useQuery({
+    queryKey: ["icd10", uuidMap["icd-10-diseases"]],
+    queryFn: () => fetchTabData(BREAKDOWN_TABS["icd-10-diseases"].apiPath, uuidMap["icd-10-diseases"]),
+    enabled: !!uuidMap["icd-10-diseases"],
+  });
+  const icd9Query = useQuery({
+    queryKey: ["icd9", uuidMap["icd-9-procedures"]],
+    queryFn: () => fetchTabData(BREAKDOWN_TABS["icd-9-procedures"].apiPath, uuidMap["icd-9-procedures"]),
+    enabled: !!uuidMap["icd-9-procedures"],
+  });
 
   const queryByType: Record<string, typeof generalQuery> = {
     "hospitalization-by-gender": genderQuery,
@@ -200,12 +229,25 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
     "hospitalization-by-admission": admissionQuery,
     "hospitalization-by-discharge": dischargeQuery,
     "hospitalization-by-service": serviceQuery,
+    "icd-10-diseases": icd10Query,
+    "icd-9-procedures": icd9Query,
   };
 
   // Active tab data
   const activeQuery = queryByType[effectiveTab];
   const activeRows = extractRows(activeQuery?.data as TabApiResponse | undefined);
   const activeConfig = BREAKDOWN_TABS[effectiveTab];
+  const activeIsMedical = effectiveTab === "icd-10-diseases" || effectiveTab === "icd-9-procedures";
+  const filteredActiveRows = useMemo(() => {
+    const filter = medicalFilter.trim().toLowerCase();
+    if (!filter || !activeIsMedical) return activeRows;
+    return activeRows.filter((row) =>
+      Object.entries(row).some(([key, value]) => {
+        if (!key.includes("code") && !key.includes("name")) return false;
+        return String(value ?? "").toLowerCase().includes(filter);
+      }),
+    );
+  }, [activeRows, activeIsMedical, medicalFilter]);
   const activeIsLoading = activeQuery?.isPending ?? false;
   const activeError = activeQuery?.isError
     ? (activeQuery.error instanceof Error ? activeQuery.error.message : "Błąd połączenia z API.")
@@ -220,12 +262,29 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
   const catalogName = CATALOG_LABELS[catalog] ?? catalog;
 
   // Export data (current tab or overview)
-  const exportRows = activeRows.length > 0 ? activeRows : (overviewRow ? [overviewRow] : []);
-  const exportColumns = activeRows.length > 0
+  const exportRows = filteredActiveRows.length > 0 ? filteredActiveRows : (breakdownTypes.length ? [] : overviewRow ? [overviewRow] : []);
+  const exportColumns = filteredActiveRows.length > 0
     ? (activeConfig?.columns ?? [])
     : OVERVIEW_COLUMNS.filter((c) => overviewRow?.[c] !== null && overviewRow?.[c] !== undefined);
-  const exportView = activeRows.length > 0 ? (activeConfig?.label ?? "Dane") : "Dane ogólne";
+  const exportView = filteredActiveRows.length > 0 ? (activeConfig?.label ?? "Dane") : "Dane ogólne";
   const exportFilename = `${productCode}_${exportView}_${effectiveYear ?? "all"}`.replace(/[^\w\-_.]/g, "_");
+  const exportMetadata = {
+    source: "Narodowy Fundusz Zdrowia - api.nfz.gov.pl/app-stat-api-jgp",
+    productName,
+    catalog: catalogName,
+    year: effectiveYear,
+    view: exportView,
+    dataType: exportView,
+    tableId: uuidMap[effectiveTab] ?? uuidMap["general-data"] ?? null,
+    filters: {
+      "Od roku / From year": yearFrom,
+      "Do roku / To year": yearTo,
+      "Wybrany rok / Selected year": effectiveYear,
+      "Filtr medyczny / Medical filter": medicalFilter || null,
+    },
+    recordCount: exportRows.length,
+    scope: "Aktualnie widoczne dane / Currently visible data",
+  };
 
   // ─── Loading ────────────────────────────────────────────────────────────────
 
@@ -262,7 +321,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
         className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 transition-colors min-h-[44px] -ml-1 pr-2"
       >
         <ChevronLeft size={14} />
-        Wróć do wyników
+        Wróć do wyników / Back to results
       </button>
 
       {/* ── Product header ────────────────────────────────────────────────── */}
@@ -281,63 +340,91 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
           rows={exportRows}
           columns={exportColumns}
           filename={exportFilename}
-          metadata={{ productName, catalog: catalogName, year: effectiveYear, view: exportView }}
+          metadata={exportMetadata}
           disabled={exportRows.length === 0}
         />
       </div>
 
       {/* ── Year range filter ─────────────────────────────────────────────── */}
       {productYears.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 p-3 rounded-md border border-slate-200 bg-slate-50">
-          <span className="text-xs font-medium text-slate-600 shrink-0">Zakres lat:</span>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs text-slate-500 shrink-0">Od</label>
-            <select
-              value={yearFrom}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                setYearFrom(v);
-                if (v > yearTo) setYearTo(v);
-              }}
-              className="min-h-[44px] rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              {ALL_YEARS.filter((y) => y <= yearTo).map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-
-            <label className="text-xs text-slate-500 shrink-0">Do</label>
-            <select
-              value={yearTo}
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                setYearTo(v);
-                if (v < yearFrom) setYearFrom(v);
-              }}
-              className="min-h-[44px] rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              {ALL_YEARS.filter((y) => y >= yearFrom).map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-
-            {!isDefaultRange && (
-              <button
-                onClick={() => { setYearFrom(MIN_YEAR); setYearTo(CURRENT_YEAR); }}
-                className="flex items-center gap-1 min-h-[44px] px-3 rounded-md border border-slate-300 bg-white text-xs text-slate-600 hover:bg-slate-100 transition-colors"
+        <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+            <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
+              <label className="text-xs font-medium text-slate-600">
+                Od roku / From year
+              </label>
+              <Select
+                value={String(yearFrom)}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  const nextYear = Number(value);
+                  setYearFrom(nextYear);
+                  if (nextYear > yearTo) setYearTo(nextYear);
+                }}
               >
-                <RotateCcw size={12} />
-                Reset
-              </button>
-            )}
+                <SelectTrigger className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="start">
+                  {ALL_YEARS.filter((year) => year <= yearTo).map((year) => (
+                    <SelectItem key={year} value={String(year)} className="min-h-[44px]">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
+              <label className="text-xs font-medium text-slate-600">
+                Do roku / To year
+              </label>
+              <Select
+                value={String(yearTo)}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  const nextYear = Number(value);
+                  setYearTo(nextYear);
+                  if (nextYear < yearFrom) setYearFrom(nextYear);
+                }}
+              >
+                <SelectTrigger className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="start">
+                  {ALL_YEARS.filter((year) => year >= yearFrom).map((year) => (
+                    <SelectItem key={year} value={String(year)} className="min-h-[44px]">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <button
+              onClick={() => {
+                setYearFrom(MIN_YEAR);
+                setYearTo(CURRENT_YEAR);
+              }}
+              disabled={isDefaultRange}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:self-end"
+            >
+              <RotateCcw size={14} aria-hidden />
+              Reset / Reset
+            </button>
           </div>
 
-          <span className="text-xs text-slate-400">
+          {yearFrom > yearTo && (
+            <p className="mt-2 text-xs text-red-600">
+              Rok początkowy nie może być większy niż rok końcowy / The start year cannot be greater than the end year
+            </p>
+          )}
+
+          <p className="mt-2 text-xs text-slate-500">
             {filteredYears.length > 0
               ? `Dane z roku ${effectiveYear} (${filteredYears.length} ${filteredYears.length === 1 ? "rok" : filteredYears.length < 5 ? "lata" : "lat"} w zakresie)`
               : "Brak danych w wybranym zakresie"}
-          </span>
+          </p>
         </div>
       )}
 
@@ -365,7 +452,10 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
               return (
                 <button
                   key={type}
-                  onClick={() => setActiveTab(type)}
+                  onClick={() => {
+                    setActiveTab(type);
+                    setMedicalFilter("");
+                  }}
                   className={[
                     "min-h-[44px] px-4 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors",
                     effectiveTab === type
@@ -386,9 +476,28 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
 
           {/* Content — single DataGrid, no layout shift */}
           <div className="overflow-x-auto">
+            {activeIsMedical && activeRows.length > 0 && (
+              <div className="relative mb-3 max-w-xl">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={15}
+                  aria-hidden
+                />
+                <Input
+                  value={medicalFilter}
+                  onChange={(event) => setMedicalFilter(event.target.value)}
+                  placeholder={
+                    effectiveTab === "icd-10-diseases"
+                      ? "Filtruj po kodzie lub nazwie ICD-10"
+                      : "Filtruj po kodzie lub nazwie ICD-9"
+                  }
+                  className="min-h-[44px] border-slate-300 bg-white pl-9 text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-400"
+                />
+              </div>
+            )}
             <DataGrid
               columns={activeConfig?.columns ?? []}
-              rows={activeRows}
+              rows={filteredActiveRows}
               isLoading={activeIsLoading}
               error={activeError}
               emptyMessage="Brak danych dla wybranego okresu."

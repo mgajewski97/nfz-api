@@ -1,55 +1,87 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildCsv, buildXlsx, type ExportMetadata } from "@/lib/export-service";
+import {
+  exportToCsv,
+  exportToXlsx,
+  safeExportFilename,
+  type ExportColumnInput,
+  type ExportMetadata,
+} from "@/lib/export-service";
 
 interface ExportBody {
-  data: Record<string, unknown>[];
-  columns: string[];
-  format: "csv" | "xlsx";
-  filename: string;
-  metadata: ExportMetadata;
+  data?: Record<string, unknown>[];
+  columns?: ExportColumnInput[];
+  format?: "csv" | "xlsx";
+  filename?: string;
+  metadata?: ExportMetadata;
 }
+
+const CONTENT_TYPES = {
+  csv: "text/csv; charset=utf-8",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+} as const;
 
 export async function POST(req: NextRequest) {
   let body: ExportBody;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Nieprawidłowe żądanie." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Nieprawidłowe żądanie eksportu." },
+      { status: 400 },
+    );
   }
 
-  const { data, columns, format, filename, metadata } = body;
+  const { data, columns, format, filename, metadata = {} } = body;
 
-  if (!Array.isArray(data) || !Array.isArray(columns)) {
-    return NextResponse.json({ error: "Brak danych do eksportu." }, { status: 400 });
+  if (!Array.isArray(data)) {
+    return NextResponse.json(
+      { error: "Brak danych do eksportu / No data to export" },
+      { status: 400 },
+    );
   }
 
-  const safeFilename = filename.replace(/[^\w\-_.]/g, "_");
+  if (!Array.isArray(columns)) {
+    return NextResponse.json(
+      { error: "Nieprawidłowa lista kolumn eksportu." },
+      { status: 400 },
+    );
+  }
 
-  if (format === "csv") {
-    const csv = buildCsv(data, columns, metadata);
-    return new NextResponse(csv, {
+  if (format !== "csv" && format !== "xlsx") {
+    return NextResponse.json(
+      { error: "Nieobsługiwany format eksportu." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const baseFilename = safeExportFilename(
+      filename ?? metadata.filename,
+      "nfz-export",
+    );
+    const enrichedMetadata: ExportMetadata = {
+      ...metadata,
+      recordCount: metadata.recordCount ?? data.length,
+      scope: metadata.scope ?? "Aktualnie widoczne dane / Currently visible data",
+    };
+    const blob =
+      format === "csv"
+        ? exportToCsv(data, columns, baseFilename, enrichedMetadata)
+        : exportToXlsx(data, columns, baseFilename, enrichedMetadata);
+
+    return new NextResponse(blob, {
       status: 200,
       headers: {
-        "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${safeFilename}.csv"`,
+        "Content-Type": CONTENT_TYPES[format],
+        "Content-Disposition": `attachment; filename="${baseFilename}.${format}"`,
+        "Cache-Control": "no-store",
       },
     });
+  } catch (error) {
+    console.error("[Export API] Failed to generate file:", error);
+    return NextResponse.json(
+      { error: "Eksport nie powiódł się / Export failed" },
+      { status: 500 },
+    );
   }
-
-  if (format === "xlsx") {
-    const buf = buildXlsx(data, columns, metadata);
-    return new NextResponse(new Uint8Array(buf), {
-      status: 200,
-      headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="${safeFilename}.xlsx"`,
-      },
-    });
-  }
-
-  return NextResponse.json(
-    { error: `Nieobsługiwany format: ${format}` },
-    { status: 400 },
-  );
 }

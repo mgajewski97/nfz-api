@@ -9,6 +9,8 @@ import type {
   HospitalizationByGenderResponse,
   HospitalizationByHealthcareServicesResponse,
   HospitalizationParams,
+  Icd10DiseasesResponse,
+  Icd9ProceduresResponse,
   CatalogCode,
   IndexOfTablesParams,
   IndexOfTablesResponse,
@@ -182,7 +184,7 @@ export async function getIndexOfTables(
  *
  * Optional filters:
  *   branch      — split results by NFZ regional branch (OW)
- *   hospitalType — split by hospital type (1–5)
+ *   hospitalType — split by hospital type (1–5), sent upstream as hospital-type
  */
 export async function getBasicData(
   id: string,
@@ -191,7 +193,7 @@ export async function getBasicData(
   const { data } = await http.get<BasicDataResponse>(`/basic-data/${id}`, {
     params: clean({
       branch: params.branch,
-      hospitalType: params.hospitalType,
+      "hospital-type": params.hospitalType,
       page: params.page ?? 1,
       limit: params.limit ?? 25,
     }),
@@ -214,7 +216,7 @@ export async function getHospitalizationsByGender(
     {
       params: clean({
         branch: params.branch,
-        hospitalType: params.hospitalType,
+        "hospital-type": params.hospitalType,
         page: params.page ?? 1,
         limit: params.limit ?? 25,
       }),
@@ -235,7 +237,7 @@ export async function getHospitalizationsByAdmissionType(
     {
       params: clean({
         branch: params.branch,
-        hospitalType: params.hospitalType,
+        "hospital-type": params.hospitalType,
         page: params.page ?? 1,
         limit: params.limit ?? 25,
       }),
@@ -256,7 +258,7 @@ export async function getHospitalizationsByDischargeType(
     {
       params: clean({
         branch: params.branch,
-        hospitalType: params.hospitalType,
+        "hospital-type": params.hospitalType,
         page: params.page ?? 1,
         limit: params.limit ?? 25,
       }),
@@ -281,7 +283,7 @@ export async function getHospitalizationsByAge(
     {
       params: clean({
         branch: params.branch,
-        hospitalType: params.hospitalType,
+        "hospital-type": params.hospitalType,
         page: params.page ?? 1,
         limit: params.limit ?? 25,
       }),
@@ -292,7 +294,13 @@ export async function getHospitalizationsByAge(
 
 // ─── /hospitalizations-by-healthcare-services/{id} ───────────────────────────
 
-/** Returns hospitalization statistics split by healthcare service scope (contract product). */
+/**
+ * Returns hospitalization statistics split by healthcare service scope (contract product).
+ *
+ * Live API note (verified 2026-05-15): index-of-tables and the working upstream
+ * route use singular `/hospitalizations-by-healthcare-service/{id}` even though
+ * parts of the public documentation mention the plural resource name.
+ */
 export async function getHospitalizationsByHealthcareServices(
   id: string,
   params: HospitalizationParams = {},
@@ -302,7 +310,45 @@ export async function getHospitalizationsByHealthcareServices(
     {
       params: clean({
         branch: params.branch,
-        hospitalType: params.hospitalType,
+        "hospital-type": params.hospitalType,
+        page: params.page ?? 1,
+        limit: params.limit ?? 25,
+      }),
+    },
+  );
+  return data;
+}
+
+// ─── /icd9-procedures/{id} ──────────────────────────────────────────────────
+
+/** Returns hospitalization statistics split by ICD-9 procedure. */
+export async function getIcd9Procedures(
+  id: string,
+  params: PaginationParams = {},
+): Promise<Icd9ProceduresResponse> {
+  const { data } = await http.get<Icd9ProceduresResponse>(
+    `/icd9-procedures/${id}`,
+    {
+      params: clean({
+        page: params.page ?? 1,
+        limit: params.limit ?? 25,
+      }),
+    },
+  );
+  return data;
+}
+
+// ─── /icd10-diseases/{id} ───────────────────────────────────────────────────
+
+/** Returns hospitalization statistics split by ICD-10 disease. */
+export async function getIcd10Diseases(
+  id: string,
+  params: PaginationParams = {},
+): Promise<Icd10DiseasesResponse> {
+  const { data } = await http.get<Icd10DiseasesResponse>(
+    `/icd10-diseases/${id}`,
+    {
+      params: clean({
         page: params.page ?? 1,
         limit: params.limit ?? 25,
       }),

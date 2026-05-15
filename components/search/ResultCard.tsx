@@ -60,6 +60,47 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
             {result.catalog} — {result.catalogLabel}
           </Badge>
         </div>
+        {result.tableSummary && (
+          <div className="mt-3 space-y-2">
+            <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+              <span>
+                Tabele:{" "}
+                <span className="font-medium text-slate-700">
+                  {result.tableSummary.tableCount}
+                </span>
+              </span>
+              {result.tableSummary.latestYear && (
+                <span>
+                  Najnowszy rok:{" "}
+                  <span className="font-medium text-slate-700">
+                    {result.tableSummary.latestYear}
+                  </span>
+                </span>
+              )}
+              {result.tableSummary.years.length > 0 && (
+                <span>
+                  Zakres:{" "}
+                  <span className="font-medium text-slate-700">
+                    {Math.min(...result.tableSummary.years)}-
+                    {Math.max(...result.tableSummary.years)}
+                  </span>
+                </span>
+              )}
+            </div>
+            {result.tableSummary.labels.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {result.tableSummary.labels.map((label) => (
+                  <span
+                    key={label}
+                    className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-500"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right: link — always visible, min touch target */}
@@ -67,7 +108,7 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
         href={detailHref}
         className="shrink-0 flex items-center gap-1.5 min-h-[44px] px-2 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap"
       >
-        Zobacz dane
+        {result.tableSummary ? "Zobacz tabele" : "Zobacz dane"}
         <ArrowRight size={12} aria-hidden />
       </Link>
     </div>

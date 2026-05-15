@@ -35,15 +35,22 @@ const NFZ_ERROR_MESSAGES: Record<number, string> = {
   4201002: "Podany parametr ma nieprawidłową wartość.",
   4201003: "Nie znaleziono żądanego zasobu.",
   4201004: "Przekroczono limit wyników na stronie (maksymalnie 25).",
+  4201023: "Wybrane filtry nie są obsługiwane dla tej tabeli. Zmień filtry i spróbuj ponownie.",
 };
 
 export function handleNfzError(error: unknown): NextResponse<ApiResponse<never>> {
   if (error instanceof NfzApiClientError) {
     const firstCode = error.apiErrors?.[0]?.["error-code"];
+    const fallbackByStatus =
+      error.status === 404
+        ? "Nie znaleziono danych dla wybranego zestawu. Wróć do wyników i wybierz inną tabelę."
+        : error.status === 400
+          ? "NFZ odrzucił parametry zapytania. Sprawdź wybrane filtry."
+          : "Zasób NFZ jest chwilowo niedostępny. Spróbuj ponownie później.";
     const friendly: string =
       (firstCode !== undefined && NFZ_ERROR_MESSAGES[firstCode]) ||
       error.apiErrors?.[0]?.["error-reason"] ||
-      error.message;
+      fallbackByStatus;
 
     const httpStatus =
       error.status === 500 && firstCode === 4200004

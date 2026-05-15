@@ -17,16 +17,42 @@ export type SearchMode = "default" | "tables" | "icd";
 
 type SearchResponse = ApiResponse<SearchResult[]> & { meta: SearchMeta | null };
 
-async function searchBenefits(q: string, catalog: string): Promise<SearchResponse> {
-  const params = new URLSearchParams({ q });
+async function searchBenefits(
+  q: string,
+  catalog: string,
+  mode: SearchMode,
+  section: string,
+): Promise<SearchResponse> {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
   if (catalog && catalog !== "all") params.set("catalog", catalog);
+  if (section && section !== "all") params.set("section", section);
+  if (mode === "tables") params.set("view", "tables");
+  if (mode === "icd") params.set("type", "icd");
   const { data } = await axios.get<SearchResponse>(`/api/nfz/search?${params}`);
   return data;
 }
 
+async function fetchSections(): Promise<string[]> {
+  const { data } = await axios.get<ApiResponse<string[]>>("/api/nfz/sections?limit=25");
+  return data.data ?? [];
+}
+
 // ─── States ───────────────────────────────────────────────────────────────────
 
-function EmptyState({ query }: { query: string }) {
+function EmptyState({ query, mode }: { query: string; mode: SearchMode }) {
+  if (mode === "tables") {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-slate-500 text-sm">
+          Brak tabel dla wybranego katalogu i sekcji.
+        </p>
+        <p className="text-slate-400 text-xs mt-2">
+          Wybierz inną sekcję albo katalog świadczeń.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="py-12 text-center">
       <p className="text-slate-500 text-sm">
@@ -64,7 +90,7 @@ function SearchHint({ mode }: { mode: SearchMode }) {
     return (
       <div className="py-10 text-center">
         <p className="text-sm text-slate-400 mb-4">
-          Wybierz katalog i wpisz fragment nazwy świadczenia, aby przeglądać dostępne tabele statystyczne.
+          Wybierz katalog i sekcję, aby przeglądać świadczenia z dostępnymi tabelami statystycznymi NFZ.
         </p>
         <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500">
           {["1a", "1b", "1c", "1d", "1w"].map((hint) => (
@@ -80,7 +106,7 @@ function SearchHint({ mode }: { mode: SearchMode }) {
     return (
       <div className="py-10 text-center">
         <p className="text-sm text-slate-400 mb-4">
-          Wpisz kod ICD-10 lub ICD-9, aby znaleźć powiązane świadczenia JGP.
+          Wyszukaj świadczenie, a potem filtruj jego rozpoznania ICD-10 i procedury ICD-9 w widoku danych.
         </p>
         <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500">
           {["I25", "I21", "J18", "K35", "C34", "M16"].map((hint) => (
@@ -113,42 +139,79 @@ function SearchHint({ mode }: { mode: SearchMode }) {
 interface SearchViewProps {
   initialQuery: string;
   initialCatalog: string;
+  initialSection?: string;
   mode?: SearchMode;
 }
 
-export function SearchView({ initialQuery, initialCatalog, mode = "default" }: SearchViewProps) {
+export function SearchView({
+  initialQuery,
+  initialCatalog,
+  initialSection = "",
+  mode = "default",
+}: SearchViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [query, setQuery] = useState(initialQuery);
-  const [catalog, setCatalog] = useState(initialCatalog || "all");
+  const defaultQuery = mode === "tables" ? initialQuery || "" : initialQuery;
+  const defaultCatalog = mode === "tables" ? initialCatalog || "1a" : initialCatalog || "all";
 
-  const [committedQuery, setCommittedQuery] = useState(initialQuery);
-  const [committedCatalog, setCommittedCatalog] = useState(initialCatalog || "all");
+  const [query, setQuery] = useState(defaultQuery);
+  const [catalog, setCatalog] = useState(defaultCatalog);
+  const [section, setSection] = useState(initialSection || "all");
 
-  const shouldFetch = committedQuery.trim().length >= 2;
+  const [committedQuery, setCommittedQuery] = useState(defaultQuery);
+  const [committedCatalog, setCommittedCatalog] = useState(defaultCatalog);
+  const [committedSection, setCommittedSection] = useState(initialSection || "all");
+
+  const shouldFetch = mode === "tables" || committedQuery.trim().length >= 2;
+
+  const sectionsQuery = useQuery({
+    queryKey: ["sections"],
+    queryFn: fetchSections,
+    enabled: mode === "tables",
+    staleTime: 30 * 60 * 1000,
+  });
 
   const { data, isFetching, isError, error } = useQuery({
-    queryKey: ["search", committedQuery, committedCatalog],
-    queryFn: () => searchBenefits(committedQuery, committedCatalog),
+    queryKey: ["search", committedQuery, committedCatalog, committedSection, mode],
+    queryFn: () =>
+      searchBenefits(committedQuery, committedCatalog, mode, committedSection),
     enabled: shouldFetch,
     placeholderData: (prev) => prev,
   });
 
   const handleSubmit = useCallback(() => {
-    const q = query.trim();
-    if (q.length < 2) return;
+    const q = mode === "tables" ? query.trim() : query.trim();
+    if (mode !== "tables" && q.length < 2) return;
     setCommittedQuery(q);
     setCommittedCatalog(catalog);
+    setCommittedSection(section);
     const params = new URLSearchParams(searchParams.toString());
-    params.set("q", q);
+    if (mode === "tables") {
+      params.set("view", "tables");
+      params.delete("type");
+      params.delete("q");
+    } else if (mode === "icd") {
+      params.set("type", "icd");
+      params.delete("view");
+      params.set("q", q);
+    } else {
+      params.delete("view");
+      params.delete("type");
+      params.set("q", q);
+    }
     if (catalog && catalog !== "all") {
       params.set("catalog", catalog);
     } else {
       params.delete("catalog");
     }
+    if (section && section !== "all") {
+      params.set("section", section);
+    } else {
+      params.delete("section");
+    }
     router.push(`/search?${params}`, { scroll: false });
-  }, [query, catalog, router, searchParams]);
+  }, [query, catalog, section, mode, router, searchParams]);
 
   const results = data?.data ?? [];
   const meta = data?.meta as SearchMeta | null;
@@ -157,28 +220,29 @@ export function SearchView({ initialQuery, initialCatalog, mode = "default" }: S
   const showResults = !isFetching && !isError && !apiError && results.length > 0;
 
   // Build the back URL to pass to result cards
+  const backParams = new URLSearchParams();
+  if (mode !== "tables" && committedQuery) backParams.set("q", committedQuery);
+  if (committedCatalog !== "all") backParams.set("catalog", committedCatalog);
+  if (committedSection !== "all") backParams.set("section", committedSection);
+  if (mode === "tables") backParams.set("view", "tables");
+  if (mode === "icd") backParams.set("type", "icd");
   const backUrl = encodeURIComponent(
-    "/search?" +
-      new URLSearchParams({
-        q: committedQuery,
-        ...(committedCatalog !== "all" ? { catalog: committedCatalog } : {}),
-        ...(mode !== "default" ? { view: mode === "tables" ? "tables" : undefined, type: mode === "icd" ? "icd" : undefined } as Record<string, string> : {}),
-      }),
+    `/search${backParams.toString() ? `?${backParams}` : ""}`,
   );
 
   return (
     <div className="space-y-6">
       {/* Mode label */}
       {mode === "tables" && (
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="px-2 py-0.5 rounded bg-slate-100 font-medium text-slate-600">Tabele statystyczne</span>
-          <span>— przeglądaj indeks tabel dostępnych dla każdego świadczenia</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span className="px-2 py-1 rounded bg-slate-100 font-medium text-slate-600">Tabele statystyczne / Statistical tables</span>
+          <span>Przeglądaj dostępne tabele statystyczne NFZ / Browse available NFZ statistical tables</span>
         </div>
       )}
       {mode === "icd" && (
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="px-2 py-0.5 rounded bg-slate-100 font-medium text-slate-600">Dane medyczne</span>
-          <span>— wyszukiwanie po kodach ICD-10 / ICD-9</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span className="px-2 py-1 rounded bg-slate-100 font-medium text-slate-600">Dane medyczne / Medical data</span>
+          <span>Przeglądaj rozpoznania ICD-10 i procedury ICD-9 / Browse ICD-10 diagnoses and ICD-9 procedures</span>
         </div>
       )}
 
@@ -186,8 +250,11 @@ export function SearchView({ initialQuery, initialCatalog, mode = "default" }: S
       <SearchInput
         query={query}
         catalog={catalog}
+        section={section}
+        sections={sectionsQuery.data ?? []}
         onQueryChange={setQuery}
         onCatalogChange={(c) => setCatalog(c || "all")}
+        onSectionChange={(s) => setSection(s || "all")}
         onSubmit={handleSubmit}
         isLoading={isFetching}
         mode={mode}
@@ -199,8 +266,10 @@ export function SearchView({ initialQuery, initialCatalog, mode = "default" }: S
           <span>
             Znaleziono{" "}
             <span className="font-medium text-slate-700">{meta.total}</span>{" "}
-            wyników dla{" "}
-            <span className="font-medium text-slate-700">&ldquo;{meta.query}&rdquo;</span>
+            {mode === "tables" ? "pozycji z tabelami" : "wyników dla "}
+            {mode !== "tables" && (
+              <span className="font-medium text-slate-700">&ldquo;{meta.query}&rdquo;</span>
+            )}
             {meta.catalogs.length < 5 && (
               <> w katalogu <span className="font-mono">{meta.catalogs.join(", ")}</span></>
             )}
@@ -218,7 +287,7 @@ export function SearchView({ initialQuery, initialCatalog, mode = "default" }: S
         />
       )}
       {apiError && <ErrorState message={apiError.message} />}
-      {showEmpty && <EmptyState query={committedQuery} />}
+      {showEmpty && <EmptyState query={committedQuery} mode={mode} />}
 
       {/* Result list */}
       {showResults && (

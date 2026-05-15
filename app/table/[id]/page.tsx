@@ -27,17 +27,22 @@ export default function TableDetailPage({ params, searchParams }: TableDetailPag
     <div className="min-h-screen bg-slate-50">
       {/* Sticky header */}
       <header className="border-b border-slate-200 bg-white sticky top-0 z-10">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <nav className="flex items-center gap-1 text-xs text-slate-500 min-w-0" aria-label="Breadcrumb">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="flex min-h-[44px] items-center gap-2 text-sm font-semibold text-slate-700">
+            <span className="text-xs tracking-widest text-slate-500">NFZ</span>
+            <span className="h-4 w-px bg-slate-200" aria-hidden />
+            <span>Statystyki JGP</span>
+          </Link>
+          <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-xs text-slate-500" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-slate-800 transition-colors shrink-0 min-h-[44px] flex items-center">
-              Strona główna
+              Strona główna / Home
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
             <Link href={backUrl} className="hover:text-slate-800 transition-colors shrink-0 min-h-[44px] flex items-center">
-              Wyszukiwarka
+              Wyszukiwarka / Search
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
-            <span className="text-slate-700 font-medium truncate">{displayName}</span>
+            <span className="min-w-0 text-slate-700 font-medium truncate" aria-current="page">{displayName}</span>
           </nav>
           <span className="hidden sm:block text-xs text-slate-400 font-mono shrink-0">
             api.nfz.gov.pl

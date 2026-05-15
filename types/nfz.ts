@@ -323,6 +323,66 @@ export interface HospitalizationByHealthcareServicesResponse {
   data: HospitalizationByHealthcareServicesTable | null;
 }
 
+// ─── /icd9-procedures/{id} ──────────────────────────────────────────────────
+
+export interface Icd9Procedure {
+  "procedure-code": string;
+  "procedure-name": string;
+  "number-of-hospitalizations": number;
+  percentage: number;
+  "duration-of-hospitalization-mediana": number;
+}
+
+export interface Icd9ProcedureAttributes {
+  year: number;
+  code: string | null;
+  name: string | null;
+  header: string | null;
+  data: Icd9Procedure[] | null;
+}
+
+export interface Icd9ProcedureTable {
+  id: string;
+  type: string;
+  attributes: Icd9ProcedureAttributes;
+}
+
+export interface Icd9ProceduresResponse {
+  meta: PaginatedMetadata;
+  links: PaginationLinks;
+  data: Icd9ProcedureTable | null;
+}
+
+// ─── /icd10-diseases/{id} ───────────────────────────────────────────────────
+
+export interface Icd10Disease {
+  "disease-code": string;
+  "disease-name": string;
+  "number-of-hospitalizations": number;
+  percentage: number;
+  "duration-of-hospitalization-mediana": number;
+}
+
+export interface Icd10DiseaseAttributes {
+  year: number;
+  code: string | null;
+  name: string | null;
+  header: string | null;
+  data: Icd10Disease[] | null;
+}
+
+export interface Icd10DiseaseTable {
+  id: string;
+  type: string;
+  attributes: Icd10DiseaseAttributes;
+}
+
+export interface Icd10DiseasesResponse {
+  meta: PaginatedMetadata;
+  links: PaginationLinks;
+  data: Icd10DiseaseTable | null;
+}
+
 // ─── Catalog codes ───────────────────────────────────────────────────────────
 
 /**

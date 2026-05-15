@@ -3,7 +3,6 @@ import {
   Search,
   Table2,
   HeartPulse,
-  Download,
   ArrowRight,
   ChevronRight,
 } from "lucide-react";
@@ -25,35 +24,24 @@ const SUMMARY_STATS = [
 const TILES = [
   {
     icon: Search,
-    title: "Wyszukaj świadczenie",
-    description:
-      "Znajdź świadczenie lub grupę JGP po nazwie, kodzie lub sekcji klinicznej. Punkt wejścia do danych statystycznych.",
+    title: "Wyszukaj świadczenie / Search service",
+    description: "Szukaj po nazwie, kodzie lub słowie kluczowym / Search by name, code, or keyword",
     href: "/search",
     badge: "Słownik",
   },
   {
     icon: Table2,
-    title: "Tabele statystyczne",
-    description:
-      "Przeglądaj dostępne tabele dla danego świadczenia — z podziałem na lata i okresy sprawozdawcze.",
-    href: "/search",
+    title: "Tabele statystyczne / Statistical tables",
+    description: "Przeglądaj dostępne tabele statystyczne NFZ / Browse available NFZ statistical tables",
+    href: "/search?view=tables",
     badge: "Indeks",
   },
   {
     icon: HeartPulse,
-    title: "Dane medyczne",
-    description:
-      "Hospitalizacje według płci, grup wiekowych, trybu przyjęcia i wypisu, zakresu świadczeń oraz oddziałów NFZ.",
-    href: "/search",
-    badge: "5 widoków",
-  },
-  {
-    icon: Download,
-    title: "Eksport danych",
-    description:
-      "Pobierz wyniki jako plik CSV lub XLSX. Dane gotowe do dalszej analizy w Excelu lub narzędziach BI.",
-    href: "/search",
-    badge: "CSV / XLSX",
+    title: "Dane medyczne / Medical data",
+    description: "Przeglądaj rozpoznania ICD-10 i procedury ICD-9 / Browse ICD-10 diagnoses and ICD-9 procedures",
+    href: "/search?type=icd",
+    badge: "ICD",
   },
 ];
 
@@ -82,7 +70,7 @@ const STEPS = [
     step: "4",
     title: "Eksportuj wyniki",
     detail:
-      "Pobierz bieżący widok lub pełny zbiór danych jako CSV albo XLSX z polskimi etykietami kolumn.",
+      "Pobierz aktualnie widoczne dane jako CSV albo XLSX z polskimi etykietami kolumn i metadanymi.",
   },
 ];
 
@@ -95,7 +83,7 @@ export default function HomePage() {
       {/* Top bar */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex min-h-[44px] items-center gap-3">
             <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
               NFZ
             </span>
@@ -103,7 +91,7 @@ export default function HomePage() {
             <span className="text-sm text-slate-700">
               Statystyki świadczeń szpitalnych
             </span>
-          </div>
+          </Link>
           <nav className="hidden sm:flex items-center gap-6 text-sm text-slate-500">
             <Link href="/search" className="hover:text-slate-900 transition-colors">
               Wyszukiwarka
@@ -142,7 +130,10 @@ export default function HomePage() {
       {/* Summary stats strip */}
       <section className="border-b border-slate-200 bg-slate-100">
         <div className="mx-auto max-w-6xl px-6 py-4">
-          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <dl
+            className="grid gap-6"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 9rem), 1fr))" }}
+          >
             {SUMMARY_STATS.map((s) => (
               <div key={s.label}>
                 <dt className="text-xs text-slate-500 mb-0.5">{s.label}</dt>
@@ -162,7 +153,10 @@ export default function HomePage() {
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-6">
             Możliwości
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            className="grid gap-4"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 15rem), 1fr))" }}
+          >
             {TILES.map((tile) => {
               const Icon = tile.icon;
               return (
@@ -205,9 +199,12 @@ export default function HomePage() {
           <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-6">
             Jak to działa
           </h2>
-          <div className="grid gap-0 sm:grid-cols-4">
+          <div
+            className="grid gap-6"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 12rem), 1fr))" }}
+          >
             {STEPS.map((s, i) => (
-              <div key={s.step} className="relative flex sm:flex-col gap-4 sm:gap-3 pb-6 sm:pb-0 sm:pr-6">
+              <div key={s.step} className="relative flex gap-4 sm:flex-col sm:gap-3 sm:pr-6">
                 {/* Connector line */}
                 {i < STEPS.length - 1 && (
                   <>
@@ -241,7 +238,10 @@ export default function HomePage() {
           <h2 className="text-sm font-semibold text-slate-800 mb-4">
             Zakres dostępnych danych
           </h2>
-          <div className="grid sm:grid-cols-3 gap-6 text-sm">
+          <div
+            className="grid gap-6 text-sm"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 14rem), 1fr))" }}
+          >
             <div>
               <p className="font-medium text-slate-700 mb-2">Katalogi świadczeń</p>
               <ul className="space-y-1 text-slate-500 text-xs">

@@ -41,6 +41,12 @@ export const FIELD_LABELS: Record<string, string> = {
   "contract-product-code": "Kod zakresu świadczeń",
   "contract-product-name": "Zakres świadczeń",
 
+  // Medical data
+  "procedure-code": "Kod procedury ICD-9",
+  "procedure-name": "Procedura ICD-9",
+  "disease-code": "Kod rozpoznania ICD-10",
+  "disease-name": "Rozpoznanie ICD-10",
+
   // Index / table attributes
   "product-code": "Kod produktu",
   "product-name": "Nazwa produktu",

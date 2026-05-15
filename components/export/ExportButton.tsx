@@ -46,7 +46,10 @@ export function ExportButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: rows, columns, format, filename, metadata }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error ?? `HTTP ${res.status}`);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -55,7 +58,7 @@ export function ExportButton({
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      setError("Eksport nie powiódł się. Spróbuj ponownie.");
+      setError("Eksport nie powiódł się / Export failed");
     } finally {
       setLoading(false);
     }
@@ -71,34 +74,35 @@ export function ExportButton({
         onClick={() => setOpen((p) => !p)}
         aria-haspopup="true"
         aria-expanded={open}
-        className="flex items-center gap-1.5 min-h-[44px] px-4 rounded-md border border-slate-300 bg-white text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        title={!rows.length ? "Brak danych do eksportu / No data to export" : undefined}
+        className="flex min-h-[44px] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-4 text-sm text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {loading ? (
           <Loader2 size={14} className="animate-spin" />
         ) : (
           <Download size={14} />
         )}
-        <span>{loading ? "Generuję…" : "Eksportuj"}</span>
+        <span>{loading ? "Generuję…" : "Eksportuj / Export"}</span>
         <ChevronDown size={12} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
       </button>
 
       {/* Dropdown menu */}
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 min-w-[140px] rounded-md border border-slate-200 bg-white shadow-md py-1">
+        <div className="absolute right-0 top-full mt-1 z-30 min-w-40 rounded-md border border-slate-200 bg-white py-1 shadow-md">
           <button
             onClick={() => doExport("csv")}
-            className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+            className="min-h-[44px] w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
           >
-            CSV
+            Eksportuj CSV / Export CSV
             <span className="block text-xs text-slate-400 font-normal">
               Do Excela, Google Sheets
             </span>
           </button>
           <button
             onClick={() => doExport("xlsx")}
-            className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+            className="min-h-[44px] w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
           >
-            XLSX
+            Eksportuj XLSX / Export XLSX
             <span className="block text-xs text-slate-400 font-normal">
               Z arkuszem metadanych
             </span>
@@ -108,7 +112,7 @@ export function ExportButton({
 
       {/* Error message — always visible, not hover-only */}
       {error && (
-        <p className="absolute top-full left-0 mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 whitespace-nowrap z-30">
+        <p className="absolute top-full left-0 z-30 mt-1 max-w-xs rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-600">
           {error}
         </p>
       )}
