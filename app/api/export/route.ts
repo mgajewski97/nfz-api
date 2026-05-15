@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   if (format === "xlsx") {
     const buf = buildXlsx(data, columns, metadata);
-    return new NextResponse(buf, {
+    return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
         "Content-Type":
