@@ -18,7 +18,8 @@ interface DataGridProps {
   emptyMessage?: string;
 }
 
-function LoadingSkeleton({ cols: _cols }: { cols: number }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function LoadingSkeleton({ cols }: { cols: number }) {
   return (
     <div className="space-y-1 animate-pulse">
       <div className="h-9 rounded bg-slate-100" />
