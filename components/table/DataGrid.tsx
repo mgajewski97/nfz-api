@@ -18,7 +18,7 @@ interface DataGridProps {
   emptyMessage?: string;
 }
 
-function LoadingSkeleton({ cols }: { cols: number }) {
+function LoadingSkeleton({ cols: _cols }: { cols: number }) {
   return (
     <div className="space-y-1 animate-pulse">
       <div className="h-9 rounded bg-slate-100" />
