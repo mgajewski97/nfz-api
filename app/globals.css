@@ -2,60 +2,658 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═════════════════════════════════════════════════════════════════════════════
+   NFZ Statystyki JGP — Holographic Mermaidcore theme
+   ═════════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Mermaidcore named palette */
+    --bg: #f5eeff;
+    --surface: rgba(255, 255, 255, 0.62);
+    --primary-hex: #a78bfa;
+    --primary-deep: #7c3aed;
+    --pink: #e879f9;
+    --cyan: #67e8f9;
+    --mint: #34d399;
+    --text: #2e0a5a;
+    --muted: #9f7aea;
+    --faint: #c4b5fd;
+
+    /* HSL token system — kept so Tailwind color utilities keep working */
+    --background: 258 60% 96%;
+    --foreground: 264 78% 20%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 264 78% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 84% 5%;
-    --radius: 0.5rem;
+    --popover-foreground: 264 78% 20%;
+    --primary: 263 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 292 80% 95%;
+    --secondary-foreground: 292 60% 38%;
+    --muted-color: 258 40% 95%;
+    --muted-foreground: 258 34% 52%;
+    --accent: 187 80% 92%;
+    --accent-foreground: 190 60% 28%;
+    --destructive: 340 82% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 258 48% 87%;
+    --input: 258 48% 87%;
+    --ring: 255 92% 76%;
+    --radius: 0.95rem;
+
+    /* Holographic accent stops */
+    --holo-1: 292 91% 73%;
+    --holo-2: 255 92% 76%;
+    --holo-3: 187 92% 69%;
+    --holo-4: 160 64% 60%;
   }
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 213 27% 84%;
+
+  /* alias so `bg-muted` keeps resolving */
+  :root {
+    --muted: 258 40% 95%;
   }
+
   * {
     @apply border-border;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground;
+    background: var(--bg);
+  }
+
+  body {
+    @apply text-foreground;
+    color: var(--text);
+    position: relative;
+    min-height: 100vh;
+  }
+}
+
+/* ─── A2: Animation keyframe library ───────────────────────────────────────── */
+
+@keyframes holoShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes holoSlide {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(400%) skewX(-12deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+
+@keyframes floatB {
+  0%, 100% { transform: translateY(0) rotate(1deg); }
+  50% { transform: translateY(-10px) rotate(-1deg); }
+}
+
+@keyframes floatC {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg) scale(1); }
+  50% { transform: translateY(-12px) rotate(2deg) scale(1.03); }
+}
+
+@keyframes floatD {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-8px) rotate(-1deg); }
+}
+
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(26px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes letterFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+}
+
+@keyframes sparkleAppear {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  40% { transform: scale(1.3) rotate(90deg); opacity: 1; }
+  100% { transform: scale(0) rotate(180deg); opacity: 0; }
+}
+
+@keyframes crystallize {
+  0% { opacity: 0.75; filter: hue-rotate(0deg) brightness(1); }
+  100% { opacity: 1; filter: hue-rotate(30deg) brightness(1.15); }
+}
+
+@keyframes causticDrift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  33% { transform: translate(6px, -5px) scale(1.02); opacity: 0.9; }
+  66% { transform: translate(-4px, 7px) scale(0.98); opacity: 0.5; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+}
+
+@keyframes auroraFloat {
+  0% { opacity: 0; transform: translate(0, 0) scale(1); }
+  25% { opacity: 0.9; }
+  50% { opacity: 0.7; transform: translate(32px, -22px) scale(1.08); }
+  75% { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes raysSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes gbRise {
+  0% { transform: translateY(100vh) translateX(0) scale(0.45); opacity: 0; }
+  7% { opacity: 1; }
+  50% { transform: translateY(38vh) translateX(20px) scale(1); }
+  93% { opacity: 0.6; }
+  100% { transform: translateY(-12vh) translateX(-10px) scale(0.88); opacity: 0; }
+}
+
+/* ─── A1: Background canvas ─────────────────────────────────────────────────── */
+
+@layer components {
+  .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .bg-canvas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(38rem 30rem at 12% 14%, rgba(232, 121, 249, 0.28), transparent 70%),
+      radial-gradient(42rem 34rem at 88% 10%, rgba(167, 139, 250, 0.3), transparent 72%),
+      radial-gradient(40rem 32rem at 84% 88%, rgba(103, 232, 249, 0.24), transparent 72%),
+      radial-gradient(36rem 30rem at 14% 86%, rgba(52, 211, 153, 0.2), transparent 72%),
+      linear-gradient(165deg, #fdf4ff 0%, #f0e4ff 32%, #fdf0f8 55%, #ebf5ff 80%, #eef8f4 100%);
+  }
+
+  .aurora {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    mix-blend-mode: multiply;
+    opacity: 0;
+  }
+  .aurora.a1 {
+    width: 26rem; height: 26rem; top: -6rem; left: -4rem;
+    background: radial-gradient(circle, rgba(232, 121, 249, 0.55), transparent 70%);
+    animation: auroraFloat 22s ease-in-out infinite;
+  }
+  .aurora.a2 {
+    width: 30rem; height: 30rem; top: -8rem; right: -6rem;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.55), transparent 70%);
+    animation: auroraFloat 26s ease-in-out infinite;
+    animation-delay: -6s;
+  }
+  .aurora.a3 {
+    width: 24rem; height: 24rem; bottom: 4rem; left: 8%;
+    background: radial-gradient(circle, rgba(103, 232, 249, 0.5), transparent 70%);
+    animation: auroraFloat 28s ease-in-out infinite;
+    animation-delay: -12s;
+  }
+  .aurora.a4 {
+    width: 28rem; height: 28rem; bottom: -6rem; right: 4%;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.42), transparent 70%);
+    animation: auroraFloat 24s ease-in-out infinite;
+    animation-delay: -18s;
+  }
+  .aurora.a5 {
+    width: 22rem; height: 22rem; top: 38%; left: 42%;
+    background: radial-gradient(circle, rgba(196, 181, 253, 0.48), transparent 70%);
+    animation: auroraFloat 18s ease-in-out infinite;
+    animation-delay: -9s;
+  }
+
+  .rays {
+    position: absolute;
+    inset: -50%;
+    background: repeating-conic-gradient(
+      from 0deg at 50% -30%,
+      rgba(255, 255, 255, 0.16) 0deg,
+      rgba(255, 255, 255, 0) 6deg 14deg
+    );
+    animation: raysSpin 80s linear infinite;
+  }
+
+  .seabed {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 140px;
+    background:
+      radial-gradient(14rem 7rem at 18% 100%, rgba(167, 139, 250, 0.34), transparent 70%),
+      radial-gradient(18rem 8rem at 52% 100%, rgba(196, 181, 253, 0.4), transparent 72%),
+      radial-gradient(16rem 7rem at 84% 100%, rgba(167, 139, 250, 0.3), transparent 72%);
+  }
+
+  /* ─── A6: Holographic rainbow strip ──────────────────────────────────────── */
+  .holo-strip {
+    height: 3px;
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      #ff79c6, #c084fc, #818cf8, #38bdf8, #34d399, #fbbf24, #f472b6, #c084fc
+    );
+    background-size: 300% 100%;
+    animation: holoShift 3s linear infinite;
+    position: relative;
+    z-index: 60;
+  }
+
+  /* ─── A3: Glassmorphism surfaces ─────────────────────────────────────────── */
+  .glass-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(192, 155, 250, 0.22);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.09);
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-color 0.35s ease, box-shadow 0.35s ease;
+  }
+  .glass-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.38),
+      transparent
+    );
+    animation: holoSlide 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(192, 155, 250, 0.4);
+    box-shadow: 0 12px 40px rgba(167, 139, 250, 0.16);
+  }
+
+  .glass-panel {
+    position: relative;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(192, 155, 250, 0.22);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.09);
+  }
+
+  .glass-modal {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(192, 155, 250, 0.28);
+    border-radius: 28px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 8px 48px rgba(167, 139, 250, 0.18);
+  }
+
+  /* ─── A4: Holographic primary button ─────────────────────────────────────── */
+  .btn-holo {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e879f9, #a78bfa, #818cf8);
+    background-size: 200% 200%;
+    animation: holoShift 5s ease infinite;
+    color: #fff;
+    border: none;
+    border-radius: 13px;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.38);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-holo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.45),
+      transparent
+    );
+    animation: holoSlide 2.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .btn-holo:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(168, 85, 247, 0.52);
+  }
+  .btn-holo:disabled {
+    filter: grayscale(0.4);
+    opacity: 0.5;
+  }
+
+  /* ─── A5: Glass input shell ──────────────────────────────────────────────── */
+  .field-shell {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1.5px solid rgba(167, 139, 250, 0.3);
+    border-radius: 18px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(167, 139, 250, 0.13);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field-shell::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    animation: holoSlide 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .field-shell:focus-within {
+    border-color: rgba(167, 139, 250, 0.6);
+    box-shadow: 0 8px 40px rgba(167, 139, 250, 0.22),
+      0 0 0 4px rgba(167, 139, 250, 0.1);
+  }
+
+  /* Translucent sticky header */
+  .header-surface {
+    position: relative;
+    z-index: 50;
+    backdrop-filter: blur(24px) saturate(160%);
+    background: rgba(253, 244, 255, 0.82);
+    border-bottom: 1px solid rgba(192, 155, 250, 0.22);
+    box-shadow: 0 2px 24px rgba(167, 139, 250, 0.08);
+  }
+
+  .footer-surface {
+    border-top: 1px solid rgba(192, 155, 250, 0.18);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+  }
+
+  /* KPI / highlight card holographic top border */
+  .holo-top {
+    position: relative;
+  }
+  .holo-top::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--holo-1)), hsl(var(--holo-2)), hsl(var(--holo-3)), hsl(var(--holo-4))
+    );
+  }
+
+  /* Holographic hairline border */
+  .holo-border {
+    position: relative;
+  }
+  .holo-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      120deg,
+      hsl(var(--holo-1)), hsl(var(--holo-2)), hsl(var(--holo-3)), hsl(var(--holo-4))
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Soft section panel */
+  .section-panel {
+    position: relative;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(192, 155, 250, 0.22);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+  }
+
+  /* Atmospheric page wrapper — quiet, content sits above bg-canvas */
+  .app-atmosphere {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  .ambient-panel {
+    position: relative;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(192, 155, 250, 0.22);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.09);
+  }
+
+  /* Soft pastel chip */
+  .soft-chip {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(192, 155, 250, 0.3);
+    border-radius: 9999px;
+    color: var(--primary-deep);
+  }
+
+  /* Soft error panel */
+  .soft-error {
+    background: rgba(255, 100, 130, 0.1);
+    border: 1px solid rgba(255, 100, 130, 0.28);
+    border-radius: 16px;
+    color: #be185d;
+  }
+
+  /* Lavender-tinted skeleton */
+  .skeleton-soft {
+    background: linear-gradient(
+      90deg,
+      rgba(196, 181, 253, 0.22),
+      rgba(232, 121, 249, 0.16),
+      rgba(196, 181, 253, 0.22)
+    );
+  }
+
+  /* Caustic light overlay */
+  .caustics {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+      radial-gradient(8rem 5rem at 20% 30%, rgba(255, 255, 255, 0.28), transparent 70%),
+      radial-gradient(7rem 4rem at 70% 20%, rgba(255, 255, 255, 0.24), transparent 70%),
+      radial-gradient(9rem 6rem at 50% 70%, rgba(255, 255, 255, 0.26), transparent 70%),
+      radial-gradient(6rem 4rem at 85% 65%, rgba(255, 255, 255, 0.2), transparent 70%),
+      radial-gradient(7rem 5rem at 12% 80%, rgba(255, 255, 255, 0.22), transparent 70%);
+    animation: causticDrift 6s ease-in-out infinite;
+  }
+
+  /* ─── B1: Glass bubbles ──────────────────────────────────────────────────── */
+  #bubblesLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .gb {
+    position: absolute;
+    bottom: 0;
+    border-radius: 50%;
+    opacity: 0;
+    animation: gbRise linear infinite;
+  }
+  .gb::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 30% 24%,
+      rgba(255, 255, 255, 0.9),
+      transparent 45%
+    );
+  }
+  .gb::after {
+    content: "";
+    position: absolute;
+    top: 17%;
+    left: 20%;
+    width: 28%;
+    height: 13%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    filter: blur(1px);
+    transform: rotate(-32deg);
+  }
+
+  /* Decorative starfish */
+  .starfish {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* ─── A6: Table / list header + value styling ──────────────────────────────── */
+
+@layer components {
+  .data-th {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(124, 58, 237, 0.55);
+  }
+  .data-num {
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-deep);
+  }
+
+  /* ─── Pastel catalog badge variants ──────────────────────────────────────── */
+  .catalog-1a {
+    background: rgba(129, 140, 248, 0.14);
+    color: #4f46e5;
+    border-color: rgba(129, 140, 248, 0.34);
+  }
+  .catalog-1b {
+    background: rgba(167, 139, 250, 0.16);
+    color: #7c3aed;
+    border-color: rgba(167, 139, 250, 0.36);
+  }
+  .catalog-1c {
+    background: rgba(103, 232, 249, 0.2);
+    color: #0e7490;
+    border-color: rgba(103, 232, 249, 0.42);
+  }
+  .catalog-1d {
+    background: rgba(251, 191, 36, 0.2);
+    color: #b45309;
+    border-color: rgba(251, 191, 36, 0.42);
+  }
+  .catalog-1w {
+    background: rgba(232, 121, 249, 0.16);
+    color: #a21caf;
+    border-color: rgba(232, 121, 249, 0.36);
+  }
+
+  /* Pearl surface card (no shimmer) — KPI tiles, quiet cards */
+  .surface-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(192, 155, 250, 0.24);
+    border-radius: 18px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.1);
+  }
+
+  /* Workspace control panel — soft glass block for filters/tabs */
+  .workspace-panel {
+    position: relative;
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(192, 155, 250, 0.24);
+    border-radius: 22px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 6px 26px rgba(167, 139, 250, 0.1);
+  }
+
+  /* Iridescent gradient fill — active tabs, emphasised controls */
+  .gradient-primary {
+    background: linear-gradient(135deg, #e879f9, #a78bfa, #818cf8);
+    background-size: 200% 200%;
+    animation: holoShift 5s ease infinite;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(168, 85, 247, 0.4);
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .animate-reveal {
+    animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* CSS-only sparkle */
+  .sparkle {
+    position: relative;
+    display: inline-block;
+  }
+  .sparkle::before,
+  .sparkle::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+  }
+  .sparkle::before {
+    width: 4px; height: 4px; top: -2px; right: -5px;
+    background: var(--pink);
+    animation: sparkleAppear 3.2s ease-in-out infinite;
+  }
+  .sparkle::after {
+    width: 2.5px; height: 2.5px; bottom: 0; right: -2px;
+    background: var(--cyan);
+    animation: sparkleAppear 3.2s ease-in-out infinite 1.4s;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .rays, .holo-strip, .glass-card::after, .btn-holo,
+  .btn-holo::before, .field-shell::before, .gb, .caustics, .sparkle::before,
+  .sparkle::after, .starfish, .animate-reveal {
+    animation: none !important;
   }
 }

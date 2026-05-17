@@ -36,25 +36,25 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
         : "Wyszukiwanie po kodzie, nazwie lub słowie kluczowym. Wyniki obejmują katalogi NFZ.";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="app-atmosphere">
       {/* Top bar */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-10">
+      <header className="header-surface sticky top-0 z-10">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="flex min-h-[44px] items-center gap-2 text-sm font-semibold text-slate-700">
-            <span className="text-xs tracking-widest text-slate-500">NFZ</span>
-            <span className="h-4 w-px bg-slate-200" aria-hidden />
+          <Link href="/" className="flex min-h-[44px] items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="sparkle text-xs tracking-widest text-primary">NFZ</span>
+            <span className="h-4 w-px bg-border" aria-hidden />
             <span>Statystyki JGP</span>
           </Link>
-          <nav className="flex min-w-0 items-center gap-1 text-xs text-slate-500" aria-label="Breadcrumb">
-            <Link href="/" className="min-h-[44px] shrink-0 inline-flex items-center hover:text-slate-800 transition-colors">
+          <nav className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground" aria-label="Breadcrumb">
+            <Link href="/" className="min-h-[44px] shrink-0 inline-flex items-center hover:text-primary transition-colors">
               Strona główna / Home
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
-            <span className="min-h-[44px] min-w-0 inline-flex items-center font-medium text-slate-700" aria-current="page">
+            <span className="min-h-[44px] min-w-0 inline-flex items-center font-medium text-foreground rounded-full bg-secondary px-2.5" aria-current="page">
               Wyszukiwarka / Search
             </span>
           </nav>
-          <span className="hidden sm:block text-xs text-slate-400 font-mono">
+          <span className="hidden sm:block text-xs text-muted-foreground font-mono">
             api.nfz.gov.pl/app-stat-api-jgp
           </span>
         </div>
@@ -62,11 +62,12 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
 
       <main className="mx-auto max-w-4xl px-6 py-8 space-y-2">
         {/* Page heading */}
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-slate-800 mb-1">
+        <div className="ambient-panel mb-6 rounded-[1.5rem] px-5 py-5">
+          <div className="pointer-events-none absolute right-6 top-5 h-2 w-2 rounded-full bg-holo-2/80 shadow-[0_0_18px_hsl(var(--holo-2)/0.8)]" aria-hidden />
+          <h1 className="text-xl font-semibold text-foreground mb-1">
             {heading}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {description}
           </p>
         </div>
@@ -82,7 +83,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
         </Suspense>
 
         {/* Footer note */}
-        <p className="pt-8 text-xs text-slate-400">
+        <p className="pt-8 text-xs text-muted-foreground">
           Dane ze słownika świadczeń NFZ. Wyszukiwanie obsługuje kody JGP
           i fragmenty nazw (bez polskich znaków diakrytycznych).
         </p>

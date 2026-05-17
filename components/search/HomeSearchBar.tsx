@@ -18,23 +18,21 @@ export function HomeSearchBar() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-2xl gap-2">
+    <form onSubmit={handleSubmit} className="relative z-10 flex w-full flex-col gap-2 sm:flex-row">
       <div className="relative flex-1">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60"
           size={16}
+          aria-hidden
         />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="np. zawał serca, E65, artroplastyka kolana…"
-          className="pl-9 h-11 border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-400"
+          className="min-h-[48px] rounded-xl bg-card/90 pl-9 shadow-[inset_0_1px_0_hsl(0_0%_100%/0.82)]"
         />
       </div>
-      <Button
-        type="submit"
-        className="h-11 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-md font-medium"
-      >
+      <Button type="submit" className="min-h-[48px] rounded-xl px-6 font-semibold">
         Szukaj
       </Button>
     </form>

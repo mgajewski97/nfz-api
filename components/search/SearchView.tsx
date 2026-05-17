@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { SearchX, Sparkles } from "lucide-react";
 import { SearchInput } from "./SearchInput";
 import { ResultCard } from "./ResultCard";
 import type { SearchResult, SearchMeta } from "@/app/api/nfz/search/route";
@@ -41,36 +42,43 @@ async function fetchSections(): Promise<string[]> {
 // ─── States ───────────────────────────────────────────────────────────────────
 
 function EmptyState({ query, mode }: { query: string; mode: SearchMode }) {
-  if (mode === "tables") {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-slate-500 text-sm">
-          Brak tabel dla wybranego katalogu i sekcji.
-        </p>
-        <p className="text-slate-400 text-xs mt-2">
-          Wybierz inną sekcję albo katalog świadczeń.
-        </p>
-      </div>
-    );
-  }
   return (
     <div className="py-12 text-center">
-      <p className="text-slate-500 text-sm">
-        Brak wyników dla{" "}
-        <span className="font-medium text-slate-700">&ldquo;{query}&rdquo;</span>.
-      </p>
-      <p className="text-slate-400 text-xs mt-2">
-        Spróbuj kodu JGP (np.&nbsp;E61, A01) lub skróconej nazwy bez polskich znaków.
-      </p>
+      <span
+        className="sparkle mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary"
+        aria-hidden
+      >
+        <SearchX size={20} />
+      </span>
+      {mode === "tables" ? (
+        <>
+          <p className="text-foreground text-sm">
+            Brak tabel dla wybranego katalogu i sekcji.
+          </p>
+          <p className="text-muted-foreground text-xs mt-2">
+            Wybierz inną sekcję albo katalog świadczeń.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-foreground text-sm">
+            Brak wyników dla{" "}
+            <span className="font-medium text-primary">&ldquo;{query}&rdquo;</span>.
+          </p>
+          <p className="text-muted-foreground text-xs mt-2">
+            Spróbuj kodu JGP (np.&nbsp;E61, A01) lub skróconej nazwy bez polskich znaków.
+          </p>
+        </>
+      )}
     </div>
   );
 }
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="py-8 px-4 rounded-md border border-red-200 bg-red-50 text-sm text-red-700">
+    <div className="soft-error px-4 py-8 text-sm">
       <p className="font-medium mb-1">Nie udało się pobrać danych</p>
-      <p className="text-red-600 text-xs">{message}</p>
+      <p className="text-destructive/80 text-xs">{message}</p>
     </div>
   );
 }
@@ -79,7 +87,7 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-2 animate-pulse">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-16 rounded-md bg-slate-100" />
+        <div key={i} className="h-16 rounded-xl skeleton-soft" />
       ))}
     </div>
   );
@@ -89,12 +97,12 @@ function SearchHint({ mode }: { mode: SearchMode }) {
   if (mode === "tables") {
     return (
       <div className="py-10 text-center">
-        <p className="text-sm text-slate-400 mb-4">
+        <p className="mb-4 text-sm text-muted-foreground">
           Wybierz katalog i sekcję, aby przeglądać świadczenia z dostępnymi tabelami statystycznymi NFZ.
         </p>
-        <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500">
+        <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
           {["1a", "1b", "1c", "1d", "1w"].map((hint) => (
-            <span key={hint} className="px-2 py-1 rounded border border-slate-200 bg-slate-50 font-mono">
+            <span key={hint} className="soft-chip px-2.5 py-1 font-mono">
               {hint}
             </span>
           ))}
@@ -105,12 +113,12 @@ function SearchHint({ mode }: { mode: SearchMode }) {
   if (mode === "icd") {
     return (
       <div className="py-10 text-center">
-        <p className="text-sm text-slate-400 mb-4">
+        <p className="mb-4 text-sm text-muted-foreground">
           Wyszukaj świadczenie, a potem filtruj jego rozpoznania ICD-10 i procedury ICD-9 w widoku danych.
         </p>
-        <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500">
+        <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
           {["I25", "I21", "J18", "K35", "C34", "M16"].map((hint) => (
-            <span key={hint} className="px-2 py-1 rounded border border-slate-200 bg-slate-50 font-mono">
+            <span key={hint} className="soft-chip px-2.5 py-1 font-mono">
               {hint}
             </span>
           ))}
@@ -120,12 +128,15 @@ function SearchHint({ mode }: { mode: SearchMode }) {
   }
   return (
     <div className="py-10 text-center">
-      <p className="text-sm text-slate-400 mb-4">
+      <span className="sparkle mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary" aria-hidden>
+        <Sparkles size={17} />
+      </span>
+      <p className="mb-4 text-sm text-muted-foreground">
         Wpisz minimum 2 znaki, aby wyszukać świadczenie lub grupę JGP.
       </p>
-      <div className="flex flex-wrap justify-center gap-2 text-xs text-slate-500">
+      <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
         {["A01", "E61", "H01", "ZABI", "RYTM", "NOWO"].map((hint) => (
-          <span key={hint} className="px-2 py-1 rounded border border-slate-200 bg-slate-50 font-mono">
+          <span key={hint} className="soft-chip px-2.5 py-1 font-mono">
             {hint}
           </span>
         ))}
@@ -234,47 +245,49 @@ export function SearchView({
     <div className="space-y-6">
       {/* Mode label */}
       {mode === "tables" && (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span className="px-2 py-1 rounded bg-slate-100 font-medium text-slate-600">Tabele statystyczne / Statistical tables</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">Tabele statystyczne / Statistical tables</span>
           <span>Przeglądaj dostępne tabele statystyczne NFZ / Browse available NFZ statistical tables</span>
         </div>
       )}
       {mode === "icd" && (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span className="px-2 py-1 rounded bg-slate-100 font-medium text-slate-600">Dane medyczne / Medical data</span>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-full bg-accent px-2.5 py-1 font-medium text-accent-foreground">Dane medyczne / Medical data</span>
           <span>Przeglądaj rozpoznania ICD-10 i procedury ICD-9 / Browse ICD-10 diagnoses and ICD-9 procedures</span>
         </div>
       )}
 
       {/* Search bar */}
-      <SearchInput
-        query={query}
-        catalog={catalog}
-        section={section}
-        sections={sectionsQuery.data ?? []}
-        onQueryChange={setQuery}
-        onCatalogChange={(c) => setCatalog(c || "all")}
-        onSectionChange={(s) => setSection(s || "all")}
-        onSubmit={handleSubmit}
-        isLoading={isFetching}
-        mode={mode}
-      />
+      <div className="ambient-panel rounded-[1.5rem] p-3 sm:p-4">
+        <SearchInput
+          query={query}
+          catalog={catalog}
+          section={section}
+          sections={sectionsQuery.data ?? []}
+          onQueryChange={setQuery}
+          onCatalogChange={(c) => setCatalog(c || "all")}
+          onSectionChange={(s) => setSection(s || "all")}
+          onSubmit={handleSubmit}
+          isLoading={isFetching}
+          mode={mode}
+        />
+      </div>
 
       {/* Results summary */}
       {showResults && meta && (
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="surface-card flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-3 text-xs text-muted-foreground">
           <span>
             Znaleziono{" "}
-            <span className="font-medium text-slate-700">{meta.total}</span>{" "}
+            <span className="font-medium text-foreground">{meta.total}</span>{" "}
             {mode === "tables" ? "pozycji z tabelami" : "wyników dla "}
             {mode !== "tables" && (
-              <span className="font-medium text-slate-700">&ldquo;{meta.query}&rdquo;</span>
+              <span className="font-medium text-primary">&ldquo;{meta.query}&rdquo;</span>
             )}
             {meta.catalogs.length < 5 && (
               <> w katalogu <span className="font-mono">{meta.catalogs.join(", ")}</span></>
             )}
           </span>
-          {isFetching && <span className="text-slate-400">Aktualizuję…</span>}
+          {isFetching && <span className="text-muted-foreground">Aktualizuję…</span>}
         </div>
       )}
 

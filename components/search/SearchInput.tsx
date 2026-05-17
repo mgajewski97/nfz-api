@@ -72,12 +72,12 @@ export function SearchInput({
       : ([["all", "Wszystkie katalogi"], ...CATALOGS] as [string, string][]);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
+    <div className="relative z-10 flex flex-col gap-2 sm:flex-row">
       {/* Query field */}
       {mode !== "tables" && (
         <div className="relative flex-1">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary/55"
             size={15}
             aria-hidden
           />
@@ -87,13 +87,14 @@ export function SearchInput({
             onChange={(e) => onQueryChange(e.target.value)}
             onKeyDown={handleKey}
             placeholder={PLACEHOLDER[mode]}
-            className="pl-9 pr-8 min-h-[44px] border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-400"
+            className="min-h-[46px] rounded-xl border-border/90 bg-card/90 pl-9 pr-9 text-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/30"
             autoFocus
           />
           {query && (
             <button
+              type="button"
               onClick={handleClear}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 min-h-[44px] flex items-center"
+              className="absolute right-2 top-1/2 flex min-h-[44px] -translate-y-1/2 items-center rounded-full p-2 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               aria-label="Wyczyść zapytanie"
             >
               <X size={13} />
@@ -110,7 +111,7 @@ export function SearchInput({
       >
         <SelectTrigger
           aria-label="Katalog świadczeń"
-          className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700 sm:max-w-sm"
+          className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)] sm:max-w-sm"
         >
           <SelectValue />
         </SelectTrigger>
@@ -132,7 +133,7 @@ export function SearchInput({
         >
           <SelectTrigger
             aria-label="Sekcja JGP"
-            className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700 sm:max-w-sm"
+            className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)] sm:max-w-sm"
           >
             <SelectValue />
           </SelectTrigger>
@@ -150,9 +151,10 @@ export function SearchInput({
       )}
 
       <Button
+        type="button"
         onClick={onSubmit}
         disabled={!canSubmit || isLoading}
-        className="min-h-[44px] px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-medium disabled:opacity-40"
+        className="min-h-[46px] rounded-xl px-6 text-sm font-semibold disabled:opacity-45"
       >
         {isLoading ? "Szukam…" : SUBMIT_LABEL[mode]}
       </Button>

@@ -291,10 +291,10 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
   if (indexQuery.isPending) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-7 w-2/3 rounded bg-slate-200" />
-        <div className="h-4 w-1/3 rounded bg-slate-100" />
-        <div className="h-20 rounded bg-slate-100" />
-        <div className="h-64 rounded bg-slate-100" />
+        <div className="h-7 w-2/3 rounded-xl skeleton-soft" />
+        <div className="h-4 w-1/3 rounded-xl skeleton-soft" />
+        <div className="h-24 rounded-2xl skeleton-soft" />
+        <div className="h-64 rounded-2xl skeleton-soft" />
       </div>
     );
   }
@@ -304,9 +304,9 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
       indexQuery.data?.error?.message ??
       (indexQuery.error instanceof Error ? indexQuery.error.message : "Nieznany błąd połączenia z API.");
     return (
-      <div className="py-8 px-4 rounded-md border border-red-200 bg-red-50 text-sm text-red-700">
+      <div className="soft-error px-4 py-8 text-sm">
         <p className="font-medium mb-1">Nie udało się pobrać indeksu tabel</p>
-        <p className="text-xs text-red-600">{msg}</p>
+        <p className="text-xs text-destructive/80">{msg}</p>
       </div>
     );
   }
@@ -317,40 +317,44 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
     <div className="space-y-6">
       {/* Back to results */}
       <button
+        type="button"
         onClick={() => (backUrl ? router.push(backUrl) : router.back())}
-        className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 transition-colors min-h-[44px] -ml-1 pr-2"
+        className="-ml-1 flex min-h-[44px] items-center gap-1 rounded-full pr-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         <ChevronLeft size={14} />
         Wróć do wyników / Back to results
       </button>
 
       {/* ── Product header ────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold text-slate-800 leading-snug">{productName}</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            <span className="font-mono text-slate-600">{productCode}</span>
-            {" · "}
-            {catalogName}
-          </p>
-        </div>
+      <div className="ambient-panel rounded-[1.5rem] px-5 py-5">
+        <div className="pointer-events-none absolute right-6 top-5 h-2 w-2 rounded-full bg-holo-3/80 shadow-[0_0_18px_hsl(var(--holo-3)/0.8)]" aria-hidden />
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold leading-snug text-foreground">{productName}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-primary">{productCode}</span>
+              {" · "}
+              {catalogName}
+            </p>
+          </div>
 
-        {/* Export — visible as soon as any data loads */}
-        <ExportButton
-          rows={exportRows}
-          columns={exportColumns}
-          filename={exportFilename}
-          metadata={exportMetadata}
-          disabled={exportRows.length === 0}
-        />
+          {/* Export — visible as soon as any data loads */}
+          <ExportButton
+            rows={exportRows}
+            columns={exportColumns}
+            filename={exportFilename}
+            metadata={exportMetadata}
+            disabled={exportRows.length === 0}
+          />
+        </div>
       </div>
 
       {/* ── Year range filter ─────────────────────────────────────────────── */}
       {productYears.length > 0 && (
-        <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+        <div className="workspace-panel p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
-              <label className="text-xs font-medium text-slate-600">
+              <label className="text-xs font-medium text-muted-foreground">
                 Od roku / From year
               </label>
               <Select
@@ -362,7 +366,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                   if (nextYear > yearTo) setYearTo(nextYear);
                 }}
               >
-                <SelectTrigger className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700">
+                <SelectTrigger className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="start">
@@ -376,7 +380,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
-              <label className="text-xs font-medium text-slate-600">
+              <label className="text-xs font-medium text-muted-foreground">
                 Do roku / To year
               </label>
               <Select
@@ -388,7 +392,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                   if (nextYear < yearFrom) setYearFrom(nextYear);
                 }}
               >
-                <SelectTrigger className="min-h-[44px] w-full rounded-md border-slate-300 bg-white text-slate-700">
+                <SelectTrigger className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="start">
@@ -402,12 +406,13 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
             </div>
 
             <button
+              type="button"
               onClick={() => {
                 setYearFrom(MIN_YEAR);
                 setYearTo(CURRENT_YEAR);
               }}
               disabled={isDefaultRange}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:self-end"
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-border bg-card/90 px-4 text-sm font-medium text-muted-foreground transition-all hover:border-ring/40 hover:bg-secondary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:self-end"
             >
               <RotateCcw size={14} aria-hidden />
               Reset / Reset
@@ -415,12 +420,12 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
           </div>
 
           {yearFrom > yearTo && (
-            <p className="mt-2 text-xs text-red-600">
+            <p className="mt-2 text-xs text-destructive">
               Rok początkowy nie może być większy niż rok końcowy / The start year cannot be greater than the end year
             </p>
           )}
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             {filteredYears.length > 0
               ? `Dane z roku ${effectiveYear} (${filteredYears.length} ${filteredYears.length === 1 ? "rok" : filteredYears.length < 5 ? "lata" : "lat"} w zakresie)`
               : "Brak danych w wybranym zakresie"}
@@ -433,16 +438,16 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
 
       {/* ── No data for this year range ────────────────────────────────────── */}
       {filteredYears.length === 0 && productYears.length > 0 && (
-        <div className="py-8 text-center text-sm text-slate-400">
+        <div className="section-panel py-8 text-center text-sm text-muted-foreground">
           Brak danych w wybranym zakresie lat. Zmień filtry lub kliknij Reset.
         </div>
       )}
 
       {/* ── Breakdown tabs ─────────────────────────────────────────────────── */}
       {breakdownTypes.length > 0 && (
-        <div className="space-y-4">
+        <div className="workspace-panel space-y-4 p-4">
           {/* Tab buttons — flex-wrap, min-h for touch */}
-          <div className="flex flex-wrap gap-1 border-b border-slate-200">
+          <div className="flex flex-wrap gap-1.5 rounded-2xl border border-border/70 bg-card/60 p-1.5" role="tablist" aria-label="Widoki danych">
             {breakdownTypes.map((type) => {
               const q = queryByType[type];
               const count =
@@ -451,21 +456,24 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                   : null;
               return (
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected={effectiveTab === type}
                   key={type}
                   onClick={() => {
                     setActiveTab(type);
                     setMedicalFilter("");
                   }}
                   className={[
-                    "min-h-[44px] px-4 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors",
+                    "min-h-[42px] rounded-xl px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                     effectiveTab === type
-                      ? "border-slate-800 text-slate-800 bg-white"
-                      : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300",
+                      ? "gradient-primary text-primary-foreground shadow-pearl"
+                      : "text-muted-foreground hover:bg-secondary/70 hover:text-primary",
                   ].join(" ")}
                 >
                   {BREAKDOWN_TABS[type].label}
                   {count !== null && (
-                    <span className="ml-1.5 text-xs text-slate-400 font-normal">
+                    <span className={effectiveTab === type ? "ml-1.5 text-xs font-normal text-white/80" : "ml-1.5 text-xs font-normal text-muted-foreground"}>
                       ({count})
                     </span>
                   )}
@@ -475,11 +483,11 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
           </div>
 
           {/* Content — single DataGrid, no layout shift */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-2xl">
             {activeIsMedical && activeRows.length > 0 && (
               <div className="relative mb-3 max-w-xl">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary/55"
                   size={15}
                   aria-hidden
                 />
@@ -491,7 +499,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                       ? "Filtruj po kodzie lub nazwie ICD-10"
                       : "Filtruj po kodzie lub nazwie ICD-9"
                   }
-                  className="min-h-[44px] border-slate-300 bg-white pl-9 text-slate-900 placeholder:text-slate-400 focus-visible:ring-slate-400"
+                  className="min-h-[46px] rounded-xl border-border/90 bg-card/90 pl-9 text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/30"
                 />
               </div>
             )}
@@ -530,7 +538,7 @@ function OverviewStrip({
     return (
       <div className="grid gap-3 animate-pulse" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}>
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-16 rounded-md bg-slate-100" />
+          <div key={i} className="h-20 rounded-2xl skeleton-soft" />
         ))}
       </div>
     );
@@ -548,12 +556,12 @@ function OverviewStrip({
       style={{ gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))" }}
     >
       {visible.map(({ key, unit }) => (
-        <div key={key} className="rounded-md border border-slate-200 bg-white px-4 py-3">
-          <p className="text-xs text-slate-500 leading-tight mb-1">{fieldLabel(key)}</p>
-          <p className="text-xl font-semibold text-slate-800 font-mono tabular-nums">
+        <div key={key} className="surface-card holo-top rounded-2xl px-4 py-4 transition-transform hover:-translate-y-0.5">
+          <p className="mb-1 text-xs leading-tight text-muted-foreground">{fieldLabel(key)}</p>
+          <p className="font-mono text-xl font-semibold tabular-nums text-foreground">
             {formatMetric(row[key])}
             {unit && (
-              <span className="text-sm font-normal text-slate-400 ml-1">{unit}</span>
+              <span className="ml-1 text-sm font-normal text-muted-foreground">{unit}</span>
             )}
           </p>
         </div>

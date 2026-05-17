@@ -67,15 +67,16 @@ export function ExportButton({
   const isDisabled = disabled || loading || !rows.length;
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative z-20" ref={menuRef}>
       {/* Main button */}
       <button
+        type="button"
         disabled={isDisabled}
         onClick={() => setOpen((p) => !p)}
         aria-haspopup="true"
         aria-expanded={open}
         title={!rows.length ? "Brak danych do eksportu / No data to export" : undefined}
-        className="flex min-h-[44px] items-center gap-1.5 rounded-md border border-slate-300 bg-white px-4 text-sm text-slate-700 transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex min-h-[46px] items-center gap-1.5 rounded-xl border border-border bg-card/90 px-4 text-sm font-medium text-foreground shadow-pearl transition-all hover:border-ring/40 hover:bg-secondary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
       >
         {loading ? (
           <Loader2 size={14} className="animate-spin" />
@@ -88,22 +89,24 @@ export function ExportButton({
 
       {/* Dropdown menu */}
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 min-w-40 rounded-md border border-slate-200 bg-white py-1 shadow-md">
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-48 overflow-hidden rounded-2xl border border-border bg-popover/95 p-1 shadow-pearl-lg">
           <button
+            type="button"
             onClick={() => doExport("csv")}
-            className="min-h-[44px] w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+            className="min-h-[44px] w-full rounded-xl px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary/70 active:bg-secondary"
           >
             Eksportuj CSV / Export CSV
-            <span className="block text-xs text-slate-400 font-normal">
+            <span className="block text-xs text-muted-foreground font-normal">
               Do Excela, Google Sheets
             </span>
           </button>
           <button
+            type="button"
             onClick={() => doExport("xlsx")}
-            className="min-h-[44px] w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+            className="min-h-[44px] w-full rounded-xl px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-secondary/70 active:bg-secondary"
           >
             Eksportuj XLSX / Export XLSX
-            <span className="block text-xs text-slate-400 font-normal">
+            <span className="block text-xs text-muted-foreground font-normal">
               Z arkuszem metadanych
             </span>
           </button>
@@ -112,7 +115,7 @@ export function ExportButton({
 
       {/* Error message — always visible, not hover-only */}
       {error && (
-        <p className="absolute top-full left-0 z-30 mt-1 max-w-xs rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-600">
+        <p className="soft-error absolute left-0 top-full z-50 mt-2 max-w-xs px-2 py-1 text-xs">
           {error}
         </p>
       )}

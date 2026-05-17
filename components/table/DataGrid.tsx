@@ -22,9 +22,9 @@ interface DataGridProps {
 function LoadingSkeleton({ cols }: { cols: number }) {
   return (
     <div className="space-y-1 animate-pulse">
-      <div className="h-9 rounded bg-slate-100" />
+      <div className="h-9 rounded-xl skeleton-soft" />
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-10 rounded bg-slate-50" />
+        <div key={i} className="h-10 rounded-xl skeleton-soft" />
       ))}
     </div>
   );
@@ -44,16 +44,16 @@ export function DataGrid({ columns, rows, isLoading, error, emptyMessage }: Data
 
   if (error) {
     return (
-      <div className="py-6 px-4 rounded-md border border-red-200 bg-red-50 text-sm text-red-700">
+      <div className="soft-error px-4 py-6 text-sm">
         <p className="font-medium mb-1">Nie udało się pobrać danych</p>
-        <p className="text-red-600 text-xs">{error}</p>
+        <p className="text-destructive/80 text-xs">{error}</p>
       </div>
     );
   }
 
   if (!rows.length) {
     return (
-      <div className="py-10 text-center text-sm text-slate-400">
+      <div className="section-panel py-10 text-center text-sm text-muted-foreground">
         {emptyMessage ?? "Brak danych dla wybranego okresu."}
       </div>
     );
@@ -64,11 +64,11 @@ export function DataGrid({ columns, rows, isLoading, error, emptyMessage }: Data
   );
 
   return (
-    <Table>
+    <Table className="overflow-hidden rounded-2xl bg-card/80">
       <TableHeader>
-        <TableRow className="bg-slate-50">
+        <TableRow className="bg-muted/70 hover:bg-muted/70">
           {visibleColumns.map((col) => (
-            <TableHead key={col} className="text-xs font-semibold text-slate-600 whitespace-normal leading-tight py-2 min-w-[120px]">
+            <TableHead key={col} className="min-w-[120px] whitespace-normal py-3 text-xs font-semibold leading-tight text-foreground">
               {fieldLabel(col)}
             </TableHead>
           ))}
@@ -78,7 +78,7 @@ export function DataGrid({ columns, rows, isLoading, error, emptyMessage }: Data
         {rows.map((row, i) => (
           <TableRow key={i}>
             {visibleColumns.map((col) => (
-              <TableCell key={col} className="text-sm text-slate-700 font-mono tabular-nums">
+              <TableCell key={col} className="font-mono text-sm tabular-nums text-foreground/80">
                 {formatValue(row[col])}
               </TableCell>
             ))}

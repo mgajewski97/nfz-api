@@ -17,7 +17,7 @@ function Highlighted({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-amber-100 text-amber-900 rounded-sm px-px">
+      <mark className="rounded-md bg-[hsl(42_95%_88%)] px-1 text-[hsl(35_58%_28%)]">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -26,16 +26,16 @@ function Highlighted({ text, query }: { text: string; query: string }) {
 }
 
 const CATALOG_COLORS: Record<string, string> = {
-  "1a": "bg-blue-50 text-blue-700 border-blue-200",
-  "1b": "bg-purple-50 text-purple-700 border-purple-200",
-  "1c": "bg-teal-50 text-teal-700 border-teal-200",
-  "1d": "bg-orange-50 text-orange-700 border-orange-200",
-  "1w": "bg-rose-50 text-rose-700 border-rose-200",
+  "1a": "catalog-1a",
+  "1b": "catalog-1b",
+  "1c": "catalog-1c",
+  "1d": "catalog-1d",
+  "1w": "catalog-1w",
 };
 
 export function ResultCard({ result, query, backUrl }: ResultCardProps) {
   const catalogColor =
-    CATALOG_COLORS[result.catalog] ?? "bg-slate-50 text-slate-600 border-slate-200";
+    CATALOG_COLORS[result.catalog] ?? "soft-chip";
 
   const detailHref =
     `/table/${encodeURIComponent(result.code)}` +
@@ -44,35 +44,37 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
     (backUrl ? `&from=${backUrl}` : "");
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-md border border-slate-200 bg-white px-4 py-3 hover:border-slate-400 transition-colors">
+    <div className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-border/90 bg-card/90 px-4 py-4 shadow-pearl transition-all hover:-translate-y-0.5 hover:border-ring/40 hover:shadow-pearl-lg sm:flex-row sm:items-start sm:justify-between">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-holo opacity-70" aria-hidden />
+      <div className="pointer-events-none absolute right-4 top-4 h-2 w-2 rounded-full bg-holo-3/70 opacity-0 shadow-[0_0_18px_hsl(var(--holo-3)/0.8)] transition-opacity group-hover:opacity-100" aria-hidden />
       {/* Left: name + meta */}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-slate-800 leading-snug mb-1.5">
+      <div className="min-w-0 flex-1 pl-1">
+        <p className="mb-2 text-sm font-semibold leading-snug text-foreground">
           <Highlighted text={result.name} query={query} />
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs text-slate-400">{result.code}</span>
-          <span className="h-3 w-px bg-slate-200" aria-hidden />
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-xs text-primary">{result.code}</span>
+          <span className="h-3 w-px bg-border" aria-hidden />
           <Badge
             variant="outline"
-            className={`text-xs font-normal px-1.5 py-0 border ${catalogColor}`}
+            className={`h-auto min-h-5 px-2 py-0.5 text-xs font-normal ${catalogColor}`}
           >
             {result.catalog} — {result.catalogLabel}
           </Badge>
         </div>
         {result.tableSummary && (
           <div className="mt-3 space-y-2">
-            <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span>
                 Tabele:{" "}
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-foreground">
                   {result.tableSummary.tableCount}
                 </span>
               </span>
               {result.tableSummary.latestYear && (
                 <span>
                   Najnowszy rok:{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-foreground">
                     {result.tableSummary.latestYear}
                   </span>
                 </span>
@@ -80,7 +82,7 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
               {result.tableSummary.years.length > 0 && (
                 <span>
                   Zakres:{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-foreground">
                     {Math.min(...result.tableSummary.years)}-
                     {Math.max(...result.tableSummary.years)}
                   </span>
@@ -92,7 +94,7 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
                 {result.tableSummary.labels.map((label) => (
                   <span
                     key={label}
-                    className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-500"
+                    className="soft-chip px-2 py-1 text-xs"
                   >
                     {label}
                   </span>
@@ -106,7 +108,7 @@ export function ResultCard({ result, query, backUrl }: ResultCardProps) {
       {/* Right: link — always visible, min touch target */}
       <Link
         href={detailHref}
-        className="shrink-0 flex items-center gap-1.5 min-h-[44px] px-2 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap"
+        className="flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-full bg-secondary/70 px-3 text-xs font-semibold text-secondary-foreground transition-all hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:justify-start"
       >
         {result.tableSummary ? "Zobacz tabele" : "Zobacz dane"}
         <ArrowRight size={12} aria-hidden />

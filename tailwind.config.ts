@@ -42,11 +42,25 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        holo: {
+          1: "hsl(var(--holo-1))",
+          2: "hsl(var(--holo-2))",
+          3: "hsl(var(--holo-3))",
+          4: "hsl(var(--holo-4))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "4xl": "2rem",
+      },
+      boxShadow: {
+        pearl: "0 1px 2px hsl(265 40% 60% / 0.06), 0 6px 18px -12px hsl(265 50% 50% / 0.18)",
+        "pearl-lg": "0 2px 6px hsl(265 40% 60% / 0.08), 0 18px 40px -22px hsl(265 50% 50% / 0.3)",
+      },
+      backgroundImage: {
+        holo: "linear-gradient(120deg, hsl(var(--holo-1)), hsl(var(--holo-2)), hsl(var(--holo-3)), hsl(var(--holo-4)))",
       },
     },
   },
