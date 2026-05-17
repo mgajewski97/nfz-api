@@ -4,9 +4,10 @@ import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { SearchX, Sparkles } from "lucide-react";
+import { SearchX, Sparkles, X } from "lucide-react";
 import { SearchInput } from "./SearchInput";
 import { ResultCard } from "./ResultCard";
+import { AiSearch, type AiSearchResult } from "./AiSearch";
 import type { SearchResult, SearchMeta } from "@/app/api/nfz/search/route";
 import type { ApiResponse } from "@/lib/api-response";
 
@@ -174,6 +175,8 @@ export function SearchView({
   const [committedCatalog, setCommittedCatalog] = useState(defaultCatalog);
   const [committedSection, setCommittedSection] = useState(initialSection || "all");
 
+  const [aiResult, setAiResult] = useState<AiSearchResult | null>(null);
+
   const shouldFetch = mode === "tables" || committedQuery.trim().length >= 2;
 
   const sectionsQuery = useQuery({
@@ -191,38 +194,54 @@ export function SearchView({
     placeholderData: (prev) => prev,
   });
 
+  // Commit filter values, push to URL and trigger the search query.
+  const runSearch = useCallback(
+    (q: string, cat: string, sec: string) => {
+      setCommittedQuery(q);
+      setCommittedCatalog(cat);
+      setCommittedSection(sec);
+      const params = new URLSearchParams(searchParams.toString());
+      if (mode === "tables") {
+        params.set("view", "tables");
+        params.delete("type");
+        params.delete("q");
+      } else if (mode === "icd") {
+        params.set("type", "icd");
+        params.delete("view");
+        if (q) params.set("q", q);
+        else params.delete("q");
+      } else {
+        params.delete("view");
+        params.delete("type");
+        if (q) params.set("q", q);
+        else params.delete("q");
+      }
+      if (cat && cat !== "all") params.set("catalog", cat);
+      else params.delete("catalog");
+      if (sec && sec !== "all") params.set("section", sec);
+      else params.delete("section");
+      router.push(`/search?${params}`, { scroll: false });
+    },
+    [mode, router, searchParams],
+  );
+
   const handleSubmit = useCallback(() => {
-    const q = mode === "tables" ? query.trim() : query.trim();
+    const q = query.trim();
     if (mode !== "tables" && q.length < 2) return;
-    setCommittedQuery(q);
-    setCommittedCatalog(catalog);
-    setCommittedSection(section);
-    const params = new URLSearchParams(searchParams.toString());
-    if (mode === "tables") {
-      params.set("view", "tables");
-      params.delete("type");
-      params.delete("q");
-    } else if (mode === "icd") {
-      params.set("type", "icd");
-      params.delete("view");
-      params.set("q", q);
-    } else {
-      params.delete("view");
-      params.delete("type");
-      params.set("q", q);
-    }
-    if (catalog && catalog !== "all") {
-      params.set("catalog", catalog);
-    } else {
-      params.delete("catalog");
-    }
-    if (section && section !== "all") {
-      params.set("section", section);
-    } else {
-      params.delete("section");
-    }
-    router.push(`/search?${params}`, { scroll: false });
-  }, [query, catalog, section, mode, router, searchParams]);
+    runSearch(q, catalog, section);
+  }, [query, catalog, section, mode, runSearch]);
+
+  // Apply AI-resolved filters: fill the inputs and run the search.
+  const handleAi = useCallback(
+    (result: AiSearchResult) => {
+      setQuery(result.query);
+      setCatalog(result.catalog || "all");
+      setSection(result.section || "all");
+      setAiResult(result);
+      runSearch(result.query, result.catalog || "all", result.section || "all");
+    },
+    [runSearch],
+  );
 
   const results = data?.data ?? [];
   const meta = data?.meta as SearchMeta | null;
@@ -257,7 +276,7 @@ export function SearchView({
         </div>
       )}
 
-      {/* Search bar */}
+      {/* Search bar + AI assistant */}
       <div className="ambient-panel rounded-[1.5rem] p-3 sm:p-4">
         <SearchInput
           query={query}
@@ -271,7 +290,57 @@ export function SearchView({
           isLoading={isFetching}
           mode={mode}
         />
+        <div className="mt-3 border-t border-[rgba(167,139,250,0.18)] pt-3">
+          <AiSearch onApply={handleAi} />
+        </div>
       </div>
+
+      {/* AI interpretation banner */}
+      {aiResult && (
+        <div className="surface-card holo-border flex flex-wrap items-start gap-3 rounded-2xl px-4 py-3">
+          <span
+            className="sparkle flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary"
+            aria-hidden
+          >
+            <Sparkles size={16} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-foreground">
+              <span className="font-semibold text-primary">AI znalazło:</span>{" "}
+              {aiResult.explanation}
+            </p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+              {aiResult.query && (
+                <span className="soft-chip px-2 py-0.5 font-mono">
+                  fraza: {aiResult.query}
+                </span>
+              )}
+              <span className="soft-chip px-2 py-0.5">
+                katalog: {aiResult.catalog}
+              </span>
+              {aiResult.section !== "all" && (
+                <span className="soft-chip px-2 py-0.5">
+                  sekcja: {aiResult.section}
+                </span>
+              )}
+              <span className="soft-chip px-2 py-0.5">
+                lata: {aiResult.yearFrom}–{aiResult.yearTo}
+              </span>
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Możesz poprawić filtry powyżej i wyszukać ponownie.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAiResult(null)}
+            aria-label="Zamknij podpowiedź AI"
+            className="holo-focus flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Results summary */}
       {showResults && meta && (
