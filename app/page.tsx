@@ -9,6 +9,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HomeSearchBar } from "@/components/search/HomeSearchBar";
+import { HomeAiSearch } from "@/components/search/HomeAiSearch";
 import { HeroVisual } from "@/components/decor/HeroVisual";
 import { HeroScatter } from "@/components/decor/HeroScatter";
 import { TitleSparkles } from "@/components/decor/TitleSparkles";
@@ -70,13 +71,13 @@ const STEPS = [
     step: "3",
     title: "Analizuj dane",
     detail:
-      "Przeglądaj dane podstawowe lub rozbitye wg płci, wieku, trybu przyjęcia/wypisu i zakresu świadczeń.",
+      "Przeglądaj dane podstawowe lub rozbite wg płci, wieku, trybu przyjęcia/wypisu i zakresu świadczeń.",
   },
   {
     step: "4",
     title: "Eksportuj wyniki",
     detail:
-      "Pobierz aktualnie widoczne dane jako CSV albo XLSX z polskimi etykietami kolumn i metadanymi.",
+      "Pobierz aktualnie widoczne dane jako XLSX z polskimi etykietami kolumn i metadanymi.",
   },
 ];
 
@@ -140,6 +141,9 @@ export default function HomePage() {
             przeglądaj tabele z podziałem na lata i eksportuj wyniki.
           </p>
           <HomeSearchBar />
+          <div className="mt-3">
+            <HomeAiSearch />
+          </div>
           <p className="search-hint">
             API:{" "}
             <a
