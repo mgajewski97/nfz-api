@@ -152,6 +152,7 @@ interface SearchViewProps {
   initialQuery: string;
   initialCatalog: string;
   initialSection?: string;
+  initialAiResult?: AiSearchResult;
   mode?: SearchMode;
 }
 
@@ -159,6 +160,7 @@ export function SearchView({
   initialQuery,
   initialCatalog,
   initialSection = "",
+  initialAiResult,
   mode = "default",
 }: SearchViewProps) {
   const router = useRouter();
@@ -175,7 +177,9 @@ export function SearchView({
   const [committedCatalog, setCommittedCatalog] = useState(defaultCatalog);
   const [committedSection, setCommittedSection] = useState(initialSection || "all");
 
-  const [aiResult, setAiResult] = useState<AiSearchResult | null>(null);
+  const [aiResult, setAiResult] = useState<AiSearchResult | null>(
+    initialAiResult ?? null,
+  );
 
   const shouldFetch = mode === "tables" || committedQuery.trim().length >= 2;
 
@@ -201,6 +205,7 @@ export function SearchView({
       setCommittedCatalog(cat);
       setCommittedSection(sec);
       const params = new URLSearchParams(searchParams.toString());
+      params.delete("ai");
       if (mode === "tables") {
         params.set("view", "tables");
         params.delete("type");

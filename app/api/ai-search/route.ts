@@ -6,34 +6,45 @@ import { CATALOG_LABELS } from "@/lib/data-mappers";
  * POST /api/ai-search
  *
  * Accepts a natural-language question and uses the Google Gemini API
- * (free tier — Google AI Studio) to translate it into structured NFZ
- * search filters.
+ * (free tier — Google AI Studio) to propose the best-matching NFZ search
+ * options. Returns a ranked list of concrete search suggestions; when one
+ * is an obvious single match the response sets autoRun = true.
  *
- * Requires the GEMINI_API_KEY environment variable (free key from
- * https://aistudio.google.com/apikey).
+ * Requires the GEMINI_API_KEY environment variable.
  *
  * Body:   { question: string }
- * Returns { data: { query, catalog, section, yearFrom, yearTo, explanation }, error: null }
+ * Returns { data: { explanation, autoRun, suggestions: [...] }, error: null }
  *      or { data: null, error: { message } }
  */
 
 const MODEL = "gemini-2.5-flash";
 const CURRENT_YEAR = new Date().getFullYear();
 const MIN_YEAR = 2015;
+const MAX_SUGGESTIONS = 5;
 
-interface AiSearchResult {
+interface AiSuggestion {
+  label: string;
   query: string;
   catalog: string;
   section: string;
   yearFrom: number;
   yearTo: number;
-  explanation: string;
+  reason: string;
 }
 
 function clampYear(value: unknown, fallback: number): number {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
   return Math.min(CURRENT_YEAR, Math.max(MIN_YEAR, Math.round(n)));
+}
+
+/** NFZ search ignores Polish diacritics — strip them so queries actually match. */
+function stripDiacritics(s: string): string {
+  return s
+    .replace(/ł/g, "l")
+    .replace(/Ł/g, "L")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
 }
 
 export async function POST(req: NextRequest) {
@@ -69,7 +80,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Sections list for the system prompt (best-effort).
   let sections: string[] = [];
   try {
     sections = await getAllSections();
@@ -86,28 +96,39 @@ export async function POST(req: NextRequest) {
 
   const system = `Jesteś asystentem wyszukiwania w bazie statystyk NFZ dotyczącej hospitalizacji w systemie Jednorodnych Grup Pacjentów (JGP).
 
-Użytkownik opisuje czego szuka w języku naturalnym (po polsku). Twoim zadaniem jest przetłumaczyć opis na strukturalne filtry wyszukiwarki.
+Wyszukiwarka NFZ działa na słowniku świadczeń JGP — dopasowuje fragment nazwy świadczenia lub kod grupy JGP (np. E61, A01). NIE rozumie pełnych zdań ani opisów.
 
-Odpowiedz WYŁĄCZNIE obiektem JSON o polach:
+Twoim zadaniem NIE jest mechaniczne przerobienie pytania na jedno hasło. Masz przeanalizować intencję użytkownika i ZAPROPONOWAĆ kilka konkretnych, trafnych wariantów wyszukiwania, które realnie coś znajdą w słowniku JGP.
+
+Odpowiedz WYŁĄCZNIE obiektem JSON:
 {
-  "query": string,        // słowa kluczowe do wyszukania: kod JGP (np. E61) lub fragment nazwy świadczenia. BEZ polskich znaków diakrytycznych (API ich nie obsługuje). Minimum 2 znaki.
-  "catalog": string,      // kod katalogu lub "all"
-  "section": string,      // dokładna nazwa sekcji z listy poniżej lub "all"
-  "yearFrom": number,     // rok początkowy, ${MIN_YEAR}-${CURRENT_YEAR}
-  "yearTo": number,       // rok końcowy, ${MIN_YEAR}-${CURRENT_YEAR}
-  "explanation": string   // krótkie zdanie po polsku wyjaśniające jak zinterpretowałeś zapytanie
+  "explanation": string,   // krótkie zdanie po polsku: jak zrozumiałeś zapytanie
+  "autoRun": boolean,      // true TYLKO gdy jedna propozycja jest oczywistym, jedynym trafnym dopasowaniem 1:1
+  "suggestions": [         // 2-5 propozycji, posortowane od najtrafniejszej
+    {
+      "label": string,     // krótka, czytelna nazwa propozycji po polsku (np. "Zawały serca — grupy JGP")
+      "query": string,     // konkretne hasło do wyszukiwarki: kod JGP lub krótkie słowo kluczowe (1-2 słowa) wystepujące w nazwach świadczeń. BEZ polskich znaków diakrytycznych (ą→a, ł→l). Min. 2 znaki.
+      "catalog": string,   // kod katalogu lub "all"
+      "section": string,   // dokładna nazwa sekcji z listy lub "all"
+      "yearFrom": number,  // ${MIN_YEAR}-${CURRENT_YEAR}
+      "yearTo": number,    // ${MIN_YEAR}-${CURRENT_YEAR}
+      "reason": string     // krótko po polsku: dlaczego ta propozycja pasuje do zapytania
+    }
+  ]
 }
 
 Dostępne katalogi (pole "catalog"):
 ${catalogsList}
 
-Dostępne sekcje JGP (pole "section" — użyj DOKŁADNEJ nazwy z listy albo "all"):
+Dostępne sekcje JGP (pole "section" — DOKŁADNA nazwa z listy albo "all"):
 ${sectionsList}
 
 Zasady:
-- Jeśli czegoś nie da się ustalić, użyj "all" dla catalog/section oraz pełnego zakresu lat ${MIN_YEAR}-${CURRENT_YEAR}.
-- "query" musi mieć co najmniej 2 znaki i nie zawierać polskich znaków diakrytycznych (ą→a, ł→l itd.).
-- Nie dodawaj żadnego tekstu poza obiektem JSON.`;
+- Proponuj różne, sensownie odmienne warianty (inne hasła/kody/katalogi), a nie 5 razy to samo.
+- "query" musi być krótkie i realistyczne — takie, które wystąpi w nazwie świadczenia JGP. Lepiej dać ogólne, pewne hasło niż długą frazę, która nic nie znajdzie.
+- Gdy czegoś nie da się ustalić, użyj "all" i pełnego zakresu lat.
+- "autoRun" ustaw na true tylko przy jednoznacznym, pojedynczym trafieniu (np. użytkownik wprost podał kod JGP).
+- Zwróć wyłącznie obiekt JSON, bez dodatkowego tekstu.`;
 
   try {
     const aiRes = await fetch(
@@ -123,10 +144,8 @@ Zasady:
           contents: [{ role: "user", parts: [{ text: question }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.2,
-            maxOutputTokens: 1024,
-            // Disable "thinking" — it would consume the output-token budget
-            // and leave the JSON answer truncated.
+            temperature: 0.3,
+            maxOutputTokens: 1400,
             thinkingConfig: { thinkingBudget: 0 },
           },
         }),
@@ -142,10 +161,7 @@ Zasady:
         message =
           "Przekroczono darmowy limit zapytań AI. Spróbuj ponownie za chwilę.";
       }
-      return NextResponse.json(
-        { data: null, error: { message } },
-        { status: 502 },
-      );
+      return NextResponse.json({ data: null, error: { message } }, { status: 502 });
     }
 
     const aiData = await aiRes.json();
@@ -158,34 +174,75 @@ Zasady:
       throw new Error("no-json");
     }
 
-    const parsed = JSON.parse(text.slice(start, end + 1)) as Partial<AiSearchResult>;
-    const validCatalogs = Object.keys(CATALOG_LABELS);
-
-    const result: AiSearchResult = {
-      query: typeof parsed.query === "string" ? parsed.query.trim() : "",
-      catalog:
-        typeof parsed.catalog === "string" && validCatalogs.includes(parsed.catalog)
-          ? parsed.catalog
-          : "all",
-      section:
-        typeof parsed.section === "string" && sections.includes(parsed.section)
-          ? parsed.section
-          : "all",
-      yearFrom: clampYear(parsed.yearFrom, MIN_YEAR),
-      yearTo: clampYear(parsed.yearTo, CURRENT_YEAR),
-      explanation:
-        typeof parsed.explanation === "string" && parsed.explanation.trim()
-          ? parsed.explanation.trim()
-          : "Zinterpretowano zapytanie i ustawiono filtry wyszukiwania.",
+    const parsed = JSON.parse(text.slice(start, end + 1)) as {
+      explanation?: unknown;
+      autoRun?: unknown;
+      suggestions?: unknown;
     };
 
-    if (result.yearFrom > result.yearTo) {
-      const tmp = result.yearFrom;
-      result.yearFrom = result.yearTo;
-      result.yearTo = tmp;
+    const validCatalogs = Object.keys(CATALOG_LABELS);
+    const rawSuggestions = Array.isArray(parsed.suggestions)
+      ? parsed.suggestions
+      : [];
+
+    const suggestions: AiSuggestion[] = rawSuggestions
+      .map((raw): AiSuggestion | null => {
+        const s = raw as Partial<AiSuggestion>;
+        const query =
+          typeof s.query === "string" ? stripDiacritics(s.query.trim()) : "";
+        if (query.length < 2) return null;
+        let yearFrom = clampYear(s.yearFrom, MIN_YEAR);
+        let yearTo = clampYear(s.yearTo, CURRENT_YEAR);
+        if (yearFrom > yearTo) [yearFrom, yearTo] = [yearTo, yearFrom];
+        return {
+          label:
+            typeof s.label === "string" && s.label.trim()
+              ? s.label.trim()
+              : query,
+          query,
+          catalog:
+            typeof s.catalog === "string" && validCatalogs.includes(s.catalog)
+              ? s.catalog
+              : "all",
+          section:
+            typeof s.section === "string" && sections.includes(s.section)
+              ? s.section
+              : "all",
+          yearFrom,
+          yearTo,
+          reason:
+            typeof s.reason === "string" && s.reason.trim()
+              ? s.reason.trim()
+              : "",
+        };
+      })
+      .filter((s): s is AiSuggestion => s !== null)
+      .slice(0, MAX_SUGGESTIONS);
+
+    if (suggestions.length === 0) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: {
+            message:
+              "AI nie znalazło pasujących propozycji wyszukiwania. Spróbuj opisać to inaczej.",
+          },
+        },
+        { status: 502 },
+      );
     }
 
-    return NextResponse.json({ data: result, error: null });
+    return NextResponse.json({
+      data: {
+        explanation:
+          typeof parsed.explanation === "string" && parsed.explanation.trim()
+            ? parsed.explanation.trim()
+            : "Oto propozycje wyszukiwania dopasowane do Twojego opisu.",
+        autoRun: parsed.autoRun === true && suggestions.length === 1,
+        suggestions,
+      },
+      error: null,
+    });
   } catch {
     return NextResponse.json(
       {

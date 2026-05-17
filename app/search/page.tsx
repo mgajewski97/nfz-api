@@ -2,9 +2,28 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { SearchView, type SearchMode } from "@/components/search/SearchView";
+import type { AiSearchResult } from "@/components/search/AiSearch";
 
 interface SearchPageProps {
-  searchParams: { q?: string; catalog?: string; section?: string; view?: string; type?: string };
+  searchParams: {
+    q?: string;
+    catalog?: string;
+    section?: string;
+    view?: string;
+    type?: string;
+    ai?: string;
+  };
+}
+
+function parseAiResult(raw: string | undefined): AiSearchResult | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as AiSearchResult;
+    if (parsed && typeof parsed.explanation === "string") return parsed;
+  } catch {
+    /* ignore malformed ai param */
+  }
+  return undefined;
 }
 
 /**
@@ -15,6 +34,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
   const q = (searchParams.q ?? "").trim();
   const catalog = searchParams.catalog ?? "";
   const section = searchParams.section ?? "";
+  const initialAiResult = parseAiResult(searchParams.ai);
   const mode: SearchMode =
     searchParams.view === "tables"
       ? "tables"
@@ -78,6 +98,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
             initialQuery={q}
             initialCatalog={catalog}
             initialSection={section}
+            initialAiResult={initialAiResult}
             mode={mode}
           />
         </Suspense>
