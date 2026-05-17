@@ -62,17 +62,17 @@ function metadataEntries(
 ): Array<[string, string]> {
   const generatedAt = metadata.generatedAt ?? new Date().toISOString();
   return [
-    ["Wygenerowano / Generated at", generatedAt],
-    ["Źródło / Source", metadata.source ?? DEFAULT_SOURCE],
-    ["Filtry / Filters", stringifyMetadataValue(metadata.filters)],
-    ["Identyfikator tabeli / Table ID", stringifyMetadataValue(metadata.tableId)],
-    ["Typ danych / Data type", stringifyMetadataValue(metadata.dataType ?? metadata.view)],
-    ["Produkt / Product", stringifyMetadataValue(metadata.productName)],
-    ["Katalog / Catalog", stringifyMetadataValue(metadata.catalog)],
-    ["Rok / Year", stringifyMetadataValue(metadata.year)],
-    ["Zakres eksportu / Export scope", stringifyMetadataValue(metadata.scope)],
+    ["Wygenerowano", generatedAt],
+    ["Źródło", metadata.source ?? DEFAULT_SOURCE],
+    ["Filtry", stringifyMetadataValue(metadata.filters)],
+    ["Identyfikator tabeli", stringifyMetadataValue(metadata.tableId)],
+    ["Typ danych", stringifyMetadataValue(metadata.dataType ?? metadata.view)],
+    ["Produkt", stringifyMetadataValue(metadata.productName)],
+    ["Katalog", stringifyMetadataValue(metadata.catalog)],
+    ["Rok", stringifyMetadataValue(metadata.year)],
+    ["Zakres eksportu", stringifyMetadataValue(metadata.scope)],
     [
-      "Liczba rekordów / Record count",
+      "Liczba rekordów",
       String(metadata.recordCount ?? rows.length),
     ],
   ];

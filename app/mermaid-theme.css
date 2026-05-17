@@ -319,5 +319,15 @@
         .glow-hover:hover{transform:translateY(-6px);border-color:rgba(232,121,249,0.5)!important;animation:pulseGlow 2s ease-in-out infinite;}
         .glow-hover:hover .stat-value,.glow-hover:hover .feat-icon{filter:drop-shadow(0 0 10px rgba(232,121,249,0.5));}
 
+        /* Holographic shimmering focus ring — cycles through iridescent colours */
+        @keyframes holoFocus{
+            0%  {box-shadow:0 0 0 2.5px rgba(232,121,249,0.85),0 0 16px rgba(232,121,249,0.6);}
+            25% {box-shadow:0 0 0 2.5px rgba(192,132,252,0.85),0 0 16px rgba(192,132,252,0.6);}
+            50% {box-shadow:0 0 0 2.5px rgba(129,140,248,0.85),0 0 16px rgba(129,140,248,0.6);}
+            75% {box-shadow:0 0 0 2.5px rgba(103,232,249,0.85),0 0 16px rgba(103,232,249,0.6);}
+            100%{box-shadow:0 0 0 2.5px rgba(232,121,249,0.85),0 0 16px rgba(232,121,249,0.6);}
+        }
+        .holo-focus:focus-visible{outline:none;animation:holoFocus 1.6s linear infinite;}
+
         .hero-scatter{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
         .scatter-bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,0.95) 0%,rgba(232,121,249,0.34) 44%,rgba(167,139,250,0.16) 72%,transparent 86%);border:1px solid rgba(255,255,255,0.55);box-shadow:0 0 18px rgba(167,139,250,0.32);}

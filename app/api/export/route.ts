@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   if (!Array.isArray(data)) {
     return NextResponse.json(
-      { error: "Brak danych do eksportu / No data to export" },
+      { error: "Brak danych do eksportu" },
       { status: 400 },
     );
   }
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     const enrichedMetadata: ExportMetadata = {
       ...metadata,
       recordCount: metadata.recordCount ?? data.length,
-      scope: metadata.scope ?? "Aktualnie widoczne dane / Currently visible data",
+      scope: metadata.scope ?? "Aktualnie widoczne dane",
     };
     const blob =
       format === "csv"
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[Export API] Failed to generate file:", error);
     return NextResponse.json(
-      { error: "Eksport nie powiódł się / Export failed" },
+      { error: "Eksport nie powiódł się" },
       { status: 500 },
     );
   }

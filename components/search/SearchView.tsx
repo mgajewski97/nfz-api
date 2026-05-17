@@ -246,14 +246,14 @@ export function SearchView({
       {/* Mode label */}
       {mode === "tables" && (
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">Tabele statystyczne / Statistical tables</span>
-          <span>Przeglądaj dostępne tabele statystyczne NFZ / Browse available NFZ statistical tables</span>
+          <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-secondary-foreground">Tabele statystyczne</span>
+          <span>Przeglądaj dostępne tabele statystyczne NFZ</span>
         </div>
       )}
       {mode === "icd" && (
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="rounded-full bg-accent px-2.5 py-1 font-medium text-accent-foreground">Dane medyczne / Medical data</span>
-          <span>Przeglądaj rozpoznania ICD-10 i procedury ICD-9 / Browse ICD-10 diagnoses and ICD-9 procedures</span>
+          <span className="rounded-full bg-accent px-2.5 py-1 font-medium text-accent-foreground">Dane medyczne</span>
+          <span>Przeglądaj rozpoznania ICD-10 i procedury ICD-9</span>
         </div>
       )}
 

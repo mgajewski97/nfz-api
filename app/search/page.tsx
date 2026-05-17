@@ -24,10 +24,10 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
 
   const heading =
     mode === "tables"
-      ? "Tabele statystyczne / Statistical tables"
+      ? "Tabele statystyczne"
       : mode === "icd"
-        ? "Dane medyczne / Medical data"
-        : "Wyszukaj świadczenie / Search service";
+        ? "Dane medyczne"
+        : "Wyszukaj świadczenie";
   const description =
     mode === "tables"
       ? "Przeglądaj dostępne tabele statystyczne NFZ według katalogu i sekcji."
@@ -47,11 +47,11 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
           </Link>
           <nav className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground" aria-label="Breadcrumb">
             <Link href="/" className="min-h-[44px] shrink-0 inline-flex items-center hover:text-primary transition-colors">
-              Strona główna / Home
+              Strona główna
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
             <span className="min-h-[44px] min-w-0 inline-flex items-center font-medium text-foreground rounded-full bg-secondary px-2.5" aria-current="page">
-              Wyszukiwarka / Search
+              Wyszukiwarka
             </span>
           </nav>
           <span className="hidden sm:block text-xs text-muted-foreground font-mono">

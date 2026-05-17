@@ -35,11 +35,11 @@ export default function TableDetailPage({ params, searchParams }: TableDetailPag
           </Link>
           <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-1 text-xs text-muted-foreground" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-primary transition-colors shrink-0 min-h-[44px] flex items-center">
-              Strona główna / Home
+              Strona główna
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
             <Link href={backUrl} className="hover:text-primary transition-colors shrink-0 min-h-[44px] flex items-center">
-              Wyszukiwarka / Search
+              Wyszukiwarka
             </Link>
             <ChevronRight size={12} className="shrink-0" aria-hidden />
             <span className="min-w-0 rounded-full bg-secondary px-2.5 py-1 font-medium text-foreground truncate" aria-current="page">{displayName}</span>

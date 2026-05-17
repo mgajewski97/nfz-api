@@ -270,13 +270,13 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
     dataType: exportView,
     tableId: uuidMap[effectiveTab] ?? uuidMap["general-data"] ?? null,
     filters: {
-      "Od roku / From year": yearFrom,
-      "Do roku / To year": yearTo,
-      "Wybrany rok / Selected year": effectiveYear,
-      "Filtr medyczny / Medical filter": medicalFilter || null,
+      "Od roku": yearFrom,
+      "Do roku": yearTo,
+      "Wybrany rok": effectiveYear,
+      "Filtr medyczny": medicalFilter || null,
     },
     recordCount: exportRows.length,
-    scope: "Aktualnie widoczne dane / Currently visible data",
+    scope: "Aktualnie widoczne dane",
   };
 
   // ─── Loading ────────────────────────────────────────────────────────────────
@@ -312,10 +312,10 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
       <button
         type="button"
         onClick={() => (backUrl ? router.push(backUrl) : router.back())}
-        className="-ml-1 flex min-h-[44px] items-center gap-1 rounded-full pr-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="holo-focus -ml-1 flex min-h-[44px] items-center gap-1 rounded-full pr-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-primary focus-visible:outline-none"
       >
         <ChevronLeft size={14} />
-        Wróć do wyników / Back to results
+        Wróć do wyników
       </button>
 
       {/* ── Product header ────────────────────────────────────────────────── */}
@@ -348,17 +348,17 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
               <label className="text-xs font-medium text-muted-foreground">
-                Od roku / From year
+                Od roku
               </label>
               <select
-                aria-label="Od roku / From year"
+                aria-label="Od roku"
                 value={String(yearFrom)}
                 onChange={(e) => {
                   const nextYear = Number(e.target.value);
                   setYearFrom(nextYear);
                   if (nextYear > yearTo) setYearTo(nextYear);
                 }}
-                className="field-native min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)] focus-visible:border-[rgba(167,139,250,0.6)] focus-visible:ring-4 focus-visible:ring-[rgba(167,139,250,0.14)]"
+                className="field-native holo-focus min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)]"
               >
                 {ALL_YEARS.filter((year) => year <= yearTo).map((year) => (
                   <option key={year} value={String(year)}>
@@ -370,17 +370,17 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
 
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
               <label className="text-xs font-medium text-muted-foreground">
-                Do roku / To year
+                Do roku
               </label>
               <select
-                aria-label="Do roku / To year"
+                aria-label="Do roku"
                 value={String(yearTo)}
                 onChange={(e) => {
                   const nextYear = Number(e.target.value);
                   setYearTo(nextYear);
                   if (nextYear < yearFrom) setYearFrom(nextYear);
                 }}
-                className="field-native min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)] focus-visible:border-[rgba(167,139,250,0.6)] focus-visible:ring-4 focus-visible:ring-[rgba(167,139,250,0.14)]"
+                className="field-native holo-focus min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)]"
               >
                 {ALL_YEARS.filter((year) => year >= yearFrom).map((year) => (
                   <option key={year} value={String(year)}>
@@ -397,16 +397,16 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                 setYearTo(CURRENT_YEAR);
               }}
               disabled={isDefaultRange}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-border bg-card/90 px-4 text-sm font-medium text-muted-foreground transition-all hover:border-ring/40 hover:bg-secondary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 sm:self-end"
+              className="holo-focus inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-border bg-card/90 px-4 text-sm font-medium text-muted-foreground transition-all hover:border-ring/40 hover:bg-secondary/70 hover:text-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:self-end"
             >
               <RotateCcw size={14} aria-hidden />
-              Reset / Reset
+              Reset
             </button>
           </div>
 
           {yearFrom > yearTo && (
             <p className="mt-2 text-xs text-destructive">
-              Rok początkowy nie może być większy niż rok końcowy / The start year cannot be greater than the end year
+              Rok początkowy nie może być większy niż rok końcowy
             </p>
           )}
 
@@ -450,7 +450,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
                     setMedicalFilter("");
                   }}
                   className={[
-                    "min-h-[42px] rounded-xl px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                    "holo-focus min-h-[42px] rounded-xl px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none",
                     effectiveTab === type
                       ? "gradient-primary text-primary-foreground shadow-pearl"
                       : "text-muted-foreground hover:bg-secondary/70 hover:text-primary",
