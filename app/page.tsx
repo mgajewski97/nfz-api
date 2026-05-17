@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { HomeSearchBar } from "@/components/search/HomeSearchBar";
 import { HeroVisual } from "@/components/decor/HeroVisual";
+import { HeroScatter } from "@/components/decor/HeroScatter";
 import { TitleSparkles } from "@/components/decor/TitleSparkles";
 
 // ─── Mock summary stats ───────────────────────────────────────────────────────
@@ -116,7 +117,8 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="hero" aria-label="Sekcja główna">
-        <div className="hero-content">
+        <HeroScatter />
+        <div className="hero-content relative z-10">
           <div className="hero-badge" role="note">
             <div className="badge-dot" aria-hidden="true" />
             Otwarte dane — Narodowy Fundusz Zdrowia
@@ -161,7 +163,7 @@ export default function HomePage() {
             style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 11rem), 1fr))" }}
           >
             {SUMMARY_STATS.map((s) => (
-              <div key={s.label} className="surface-card holo-top rounded-2xl px-4 py-4 transition-transform hover:-translate-y-0.5">
+              <div key={s.label} className="surface-card holo-top glow-hover rounded-2xl px-4 py-4">
                 <dt className="text-xs text-muted-foreground mb-0.5">{s.label}</dt>
                 <dd className="text-xl font-semibold text-foreground tabular-nums">
                   {s.value}
@@ -188,7 +190,7 @@ export default function HomePage() {
               const Icon = tile.icon;
               return (
                 <Link key={tile.title} href={tile.href} className="group block">
-                  <Card className="h-full holo-border transition-all hover:-translate-y-1 hover:shadow-pearl-lg hover:border-ring/40">
+                  <Card className="h-full holo-border glow-hover">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className={`p-2.5 rounded-xl transition-colors ${tile.tint}`}>

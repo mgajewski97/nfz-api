@@ -39,6 +39,7 @@ export default function RootLayout({
           <div className="aurora a4" />
           <div className="aurora a5" />
           <div className="rays" />
+          <div className="water-glow" />
           <div className="seabed" />
         </div>
         <div className="bubbles-layer" aria-hidden="true" id="bubblesLayer" />

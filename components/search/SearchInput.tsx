@@ -4,13 +4,6 @@ import { useRef } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CATALOG_LABELS } from "@/lib/data-mappers";
 import type { CatalogCode } from "@/types/nfz";
 import type { SearchMode } from "./SearchView";
@@ -28,6 +21,10 @@ const SUBMIT_LABEL: Record<SearchMode, string> = {
   tables: "Pokaż tabele",
   icd: "Szukaj",
 };
+
+/* Native select — reliable cross-browser interaction (base-ui Select is unreliable here) */
+const SELECT_CLASS =
+  "field-native min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)] focus-visible:border-[rgba(167,139,250,0.6)] focus-visible:ring-4 focus-visible:ring-[rgba(167,139,250,0.14)] sm:max-w-sm";
 
 interface SearchInputProps {
   query: string;
@@ -103,51 +100,35 @@ export function SearchInput({
         </div>
       )}
 
-      <Select
+      {/* Catalog filter — native select */}
+      <select
         value={catalog}
-        onValueChange={(value) => {
-          if (value) onCatalogChange(value);
-        }}
+        onChange={(e) => onCatalogChange(e.target.value)}
+        aria-label="Katalog świadczeń"
+        className={SELECT_CLASS}
       >
-        <SelectTrigger
-          aria-label="Katalog świadczeń"
-          className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)] sm:max-w-sm"
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent align="start">
-          {catalogOptions.map(([code, label]) => (
-            <SelectItem key={code} value={code} className="min-h-[44px]">
-              {code === "all" ? label : `${code} - ${label}`}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {catalogOptions.map(([code, label]) => (
+          <option key={code} value={code}>
+            {code === "all" ? label : `${code} - ${label}`}
+          </option>
+        ))}
+      </select>
 
+      {/* Section filter — native select (tables mode) */}
       {mode === "tables" && (
-        <Select
+        <select
           value={section}
-          onValueChange={(value) => {
-            if (value) onSectionChange(value);
-          }}
+          onChange={(e) => onSectionChange(e.target.value)}
+          aria-label="Sekcja JGP"
+          className={SELECT_CLASS}
         >
-          <SelectTrigger
-            aria-label="Sekcja JGP"
-            className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.8)] sm:max-w-sm"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent align="start" className="max-w-[calc(100vw-2rem)]">
-            <SelectItem value="all" className="min-h-[44px]">
-              Wszystkie sekcje
-            </SelectItem>
-            {sections.map((item) => (
-              <SelectItem key={item} value={item} className="min-h-[44px] whitespace-normal">
-                {item}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="all">Wszystkie sekcje</option>
+          {sections.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
       )}
 
       <Button

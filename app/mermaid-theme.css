@@ -7,20 +7,29 @@
         .bg-canvas::before{
             content:'';position:absolute;inset:0;
             background:
-                    radial-gradient(ellipse 100% 60% at 0%   0%,  rgba(242,187,255,0.55) 0%,transparent 52%),
-                    radial-gradient(ellipse 80%  55% at 100% 0%,  rgba(186,220,255,0.48) 0%,transparent 50%),
-                    radial-gradient(ellipse 70%  50% at 50%  100%,rgba(170,255,225,0.38) 0%,transparent 50%),
-                    radial-gradient(ellipse 60%  45% at 0%   72%, rgba(215,185,255,0.42) 0%,transparent 45%),
-                    radial-gradient(ellipse 65%  40% at 100% 65%, rgba(175,228,255,0.38) 0%,transparent 45%),
-                    linear-gradient(160deg,#fdf4ff 0%,#f0e4ff 28%,#fdf0f8 52%,#ebf5ff 76%,#eefff8 100%);
+                    radial-gradient(ellipse 120% 72% at 6% -8%,  rgba(255,150,232,0.58) 0%,transparent 56%),
+                    radial-gradient(ellipse 100% 66% at 100% -6%,rgba(138,205,255,0.58) 0%,transparent 56%),
+                    radial-gradient(ellipse 96%  58% at 50% 110%,rgba(120,242,212,0.5) 0%,transparent 60%),
+                    radial-gradient(ellipse 72%  52% at -10% 58%,rgba(222,158,255,0.52) 0%,transparent 52%),
+                    radial-gradient(ellipse 74%  50% at 110% 54%,rgba(150,222,255,0.52) 0%,transparent 52%),
+                    radial-gradient(ellipse 60%  32% at 50% 48%, rgba(255,226,250,0.46) 0%,transparent 62%),
+                    linear-gradient(180deg,#f3e4ff 0%,#ffe2f5 24%,#ece0ff 48%,#ddeeff 72%,#e4faf2 100%);
         }
+        .bg-canvas::after{
+            content:'';position:absolute;inset:0;
+            background:linear-gradient(115deg,transparent 0%,rgba(255,121,198,0.13) 18%,transparent 33%,rgba(129,140,248,0.14) 50%,transparent 66%,rgba(56,189,248,0.13) 82%,transparent 100%);
+            background-size:300% 100%;
+            animation:holoShift 16s ease-in-out infinite;
+            mix-blend-mode:screen;opacity:0.75;
+        }
+        .water-glow{position:absolute;left:0;right:0;bottom:0;height:44%;background:linear-gradient(180deg,transparent 0%,rgba(186,230,255,0.26) 52%,rgba(216,180,254,0.34) 100%);mix-blend-mode:screen;}
         .aurora{position:absolute;border-radius:50%;filter:blur(65px);mix-blend-mode:multiply;opacity:0;animation:auroraFloat ease-in-out infinite;}
         .a1{width:700px;height:380px;top:-80px;left:-160px;background:radial-gradient(ellipse,rgba(228,115,249,0.32) 0%,rgba(167,139,250,0.1) 55%,transparent 70%);animation-duration:20s;}
         .a2{width:580px;height:300px;top:0;right:-100px;background:radial-gradient(ellipse,rgba(140,200,255,0.42) 0%,rgba(103,232,249,0.12) 55%,transparent 70%);animation-duration:24s;animation-delay:-7s;}
         .a3{width:540px;height:430px;bottom:40px;left:22%;background:radial-gradient(ellipse,rgba(158,240,204,0.35) 0%,rgba(103,232,249,0.08) 55%,transparent 70%);animation-duration:28s;animation-delay:-14s;}
         .a4{width:470px;height:270px;top:45%;right:-80px;background:radial-gradient(ellipse,rgba(252,200,230,0.48) 0%,rgba(232,121,249,0.1) 55%,transparent 70%);animation-duration:22s;animation-delay:-5s;}
         .a5{width:390px;height:290px;bottom:18%;left:-75px;background:radial-gradient(ellipse,rgba(190,174,253,0.38) 0%,rgba(167,139,250,0.08) 55%,transparent 70%);animation-duration:18s;animation-delay:-9s;}
-        @keyframes auroraFloat{0%{opacity:0;transform:translate(0,0) scale(1);}20%{opacity:0.92;}50%{opacity:0.72;transform:translate(32px,-22px) scale(1.08);}80%{opacity:0.92;}100%{opacity:0;transform:translate(0,0) scale(1);}}
+        @keyframes auroraFloat{0%{opacity:0;transform:translate(0,0) scale(1);}20%{opacity:1;}50%{opacity:0.88;transform:translate(32px,-22px) scale(1.12);}80%{opacity:1;}100%{opacity:0;transform:translate(0,0) scale(1);}}
         .rays{position:absolute;top:0;left:50%;transform:translateX(-50%);width:180%;height:65%;background:repeating-conic-gradient(from 270deg at 50% -30%,rgba(167,139,250,0.022) 0deg 5deg,transparent 5deg 12deg);animation:raysSpin 80s linear infinite;}
         @keyframes raysSpin{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(360deg)}}
         .seabed{position:absolute;bottom:0;left:0;right:0;height:140px;background:radial-gradient(ellipse 22% 65% at 8% 100%,rgba(210,175,255,0.32) 0%,transparent 60%),radial-gradient(ellipse 28% 72% at 46% 100%,rgba(200,165,255,0.28) 0%,transparent 60%),radial-gradient(ellipse 20% 58% at 74% 100%,rgba(193,178,253,0.26) 0%,transparent 55%),radial-gradient(ellipse 24% 68% at 92% 100%,rgba(206,162,255,0.28) 0%,transparent 60%);}
@@ -301,3 +310,14 @@
 
         @media(max-width:960px){.hero{grid-template-columns:1fr;}.hero-visual{height:280px;}.stats-grid{grid-template-columns:repeat(2,1fr);}.features-grid{grid-template-columns:repeat(2,1fr);}.tab-row{flex-wrap:wrap;gap:0.75rem;}}
         @media(max-width:600px){.features-grid{grid-template-columns:1fr;}.hero-title{font-size:2.5rem;}}
+
+        /* ═══ THEME ADD-ONS — native selects, hover glow, hero scatter ═══ */
+        .field-native{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 0.85rem center;}
+
+        @keyframes pulseGlow{0%,100%{box-shadow:0 6px 24px rgba(167,139,250,0.16),0 0 0 1px rgba(232,121,249,0.2);}50%{box-shadow:0 16px 44px rgba(232,121,249,0.42),0 0 28px rgba(103,232,249,0.34),0 0 0 1px rgba(232,121,249,0.45);}}
+        .glow-hover{transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease,border-color .35s ease;}
+        .glow-hover:hover{transform:translateY(-6px);border-color:rgba(232,121,249,0.5)!important;animation:pulseGlow 2s ease-in-out infinite;}
+        .glow-hover:hover .stat-value,.glow-hover:hover .feat-icon{filter:drop-shadow(0 0 10px rgba(232,121,249,0.5));}
+
+        .hero-scatter{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+        .scatter-bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,0.95) 0%,rgba(232,121,249,0.34) 44%,rgba(167,139,250,0.16) 72%,transparent 86%);border:1px solid rgba(255,255,255,0.55);box-shadow:0 0 18px rgba(167,139,250,0.32);}

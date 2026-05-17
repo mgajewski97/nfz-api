@@ -8,13 +8,6 @@ import { ChevronLeft, RotateCcw, Search } from "lucide-react";
 import { DataGrid } from "./DataGrid";
 import { ExportButton } from "@/components/export/ExportButton";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CATALOG_LABELS, fieldLabel } from "@/lib/data-mappers";
 import type { CatalogCode } from "@/types/nfz";
 import type { ApiResponse } from "@/lib/api-response";
@@ -357,52 +350,44 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
               <label className="text-xs font-medium text-muted-foreground">
                 Od roku / From year
               </label>
-              <Select
+              <select
+                aria-label="Od roku / From year"
                 value={String(yearFrom)}
-                onValueChange={(value) => {
-                  if (!value) return;
-                  const nextYear = Number(value);
+                onChange={(e) => {
+                  const nextYear = Number(e.target.value);
                   setYearFrom(nextYear);
                   if (nextYear > yearTo) setYearTo(nextYear);
                 }}
+                className="field-native min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)] focus-visible:border-[rgba(167,139,250,0.6)] focus-visible:ring-4 focus-visible:ring-[rgba(167,139,250,0.14)]"
               >
-                <SelectTrigger className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="start">
-                  {ALL_YEARS.filter((year) => year <= yearTo).map((year) => (
-                    <SelectItem key={year} value={String(year)} className="min-h-[44px]">
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {ALL_YEARS.filter((year) => year <= yearTo).map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1 sm:max-w-xs">
               <label className="text-xs font-medium text-muted-foreground">
                 Do roku / To year
               </label>
-              <Select
+              <select
+                aria-label="Do roku / To year"
                 value={String(yearTo)}
-                onValueChange={(value) => {
-                  if (!value) return;
-                  const nextYear = Number(value);
+                onChange={(e) => {
+                  const nextYear = Number(e.target.value);
                   setYearTo(nextYear);
                   if (nextYear < yearFrom) setYearFrom(nextYear);
                 }}
+                className="field-native min-h-[46px] w-full cursor-pointer rounded-xl border-[1.5px] border-[rgba(167,139,250,0.32)] bg-white/85 px-3.5 pr-9 text-sm text-[#3b0764] outline-none transition-colors hover:border-[rgba(167,139,250,0.5)] focus-visible:border-[rgba(167,139,250,0.6)] focus-visible:ring-4 focus-visible:ring-[rgba(167,139,250,0.14)]"
               >
-                <SelectTrigger className="min-h-[46px] w-full rounded-xl border-border/90 bg-card/90 text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent align="start">
-                  {ALL_YEARS.filter((year) => year >= yearFrom).map((year) => (
-                    <SelectItem key={year} value={String(year)} className="min-h-[44px]">
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {ALL_YEARS.filter((year) => year >= yearFrom).map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button
@@ -427,7 +412,7 @@ export function TableDetailView({ code, catalog, name, backUrl }: TableDetailVie
 
           <p className="mt-2 text-xs text-muted-foreground">
             {filteredYears.length > 0
-              ? `Dane z roku ${effectiveYear} (${filteredYears.length} ${filteredYears.length === 1 ? "rok" : filteredYears.length < 5 ? "lata" : "lat"} w zakresie)`
+              ? `Dane z roku ${effectiveYear} (${filteredYears.length} ${filteredYears.length  === 1 ? "rok" : filteredYears.length < 5 ? "lata" : "lat"} w zakresie)`
               : "Brak danych w wybranym zakresie"}
           </p>
         </div>
